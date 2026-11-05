@@ -121,46 +121,95 @@
 
   <a href="https://wa.me/201110666981" class="whatsapp-float" target="_blank">💬</a>
 
-  <!-- تضمين المنتجات مباشرة داخل الصفحة (بدلاً من app.js و products.json) -->
+  <!-- ============================================= -->
+  <!-- تحميل المنتجات من products.json مع بدائل وحماية -->
+  <!-- ============================================= -->
   <script>
-    // يمكنك تعديل هذه القائمة بمنتجاتك الحقيقية
-    const products = [
-      { id: 1, name: "رولمان بلي أمامي تويوتا كورولا", category: "سيارات", price: 350, oldPrice: 450, badge: "خصم" },
-      { id: 2, name: "رولمان بلي خلفي هوندا سيفيك", category: "سيارات", price: 280, oldPrice: 320, badge: "" },
-      { id: 3, name: "رولمان بلي صناعي SKF 6205", category: "صناعي", price: 120, oldPrice: 150, badge: "جديد" },
-      { id: 4, name: "رولمان بلي صناعي NSK 6304", category: "صناعي", price: 95, oldPrice: 0, badge: "" },
-      { id: 5, name: "رولمان بلي دراجة هوائية مقاس 6000", category: "دراجات", price: 45, oldPrice: 60, badge: "خصم" },
-      { id: 6, name: "رولمان بلي موتوسيكل هوندا", category: "دراجات", price: 75, oldPrice: 0, badge: "" }
+    // منتجات احتياطية تظهر فقط إذا فشل تحميل products.json
+    const fallbackProducts = [
+      { id: 1, name: "رولمان بلي أمامي تويوتا كورولا", category: "سيارات", price: 350, oldPrice: 450, badge: "خصم", image: "" },
+      { id: 2, name: "رولمان بلي خلفي هوندا سيفيك", category: "سيارات", price: 280, oldPrice: 320, badge: "", image: "" },
+      { id: 3, name: "رولمان بلي صناعي SKF 6205", category: "صناعي", price: 120, oldPrice: 150, badge: "جديد", image: "" },
+      { id: 4, name: "رولمان بلي صناعي NSK 6304", category: "صناعي", price: 95, oldPrice: 0, badge: "", image: "" },
+      { id: 5, name: "رولمان بلي دراجة هوائية مقاس 6000", category: "دراجات", price: 45, oldPrice: 60, badge: "خصم", image: "" },
+      { id: 6, name: "رولمان بلي موتوسيكل هوندا", category: "دراجات", price: 75, oldPrice: 0, badge: "", image: "" }
     ];
 
-    function renderProducts() {
+    // دالة عرض المنتجات
+    function renderProducts(list) {
       const grid = document.getElementById('storeProducts');
       if (!grid) return;
-      grid.innerHTML = products.map(p => `
-        <div class="product-card">
-          <div class="product-image">
-            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:60px;background:#f1f5f9;">⚙️</div>
-            ${p.badge ? `<span class="badge">${p.badge}</span>` : ''}
-          </div>
-          <div class="product-info">
-            <div class="product-category">${p.category}</div>
-            <h3 class="product-title">${p.name}</h3>
-            <div class="product-price">
-              <span class="current-price">${p.price} ج.م</span>
-              ${p.oldPrice ? `<span class="old-price">${p.oldPrice} ج.م</span>` : ''}
+
+      if (!Array.isArray(list) || list.length === 0) {
+        grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#64748b;font-weight:700;">لا توجد منتجات حالياً.</p>';
+        return;
+      }
+
+      grid.innerHTML = list.map(p => {
+        const safeName = String(p.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const imageHtml = p.image
+          ? `<img src="${p.image}" alt="${safeName}" onerror="this.style.display='none';this.parentNode.innerHTML='<div style=\\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:60px;background:#f1f5f9;\\'>⚙️</div>';" />`
+          : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:60px;background:#f1f5f9;">⚙️</div>`;
+
+        return `
+          <div class="product-card">
+            <div class="product-image">
+              ${imageHtml}
+              ${p.badge ? `<span class="badge">${p.badge}</span>` : ''}
             </div>
-            <button class="btn-order" onclick="orderProduct('${p.name.replace(/'/g, "\\'")}')">🛒 اطلب عبر واتساب</button>
+            <div class="product-info">
+              <div class="product-category">${p.category || ''}</div>
+              <h3 class="product-title">${p.name || ''}</h3>
+              <div class="product-price">
+                <span class="current-price">${p.price ?? 0} ج.م</span>
+                ${p.oldPrice ? `<span class="old-price">${p.oldPrice} ج.م</span>` : ''}
+              </div>
+              <button class="btn-order" onclick="orderProduct('${safeName}')">🛒 اطلب عبر واتساب</button>
+            </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
+    // دالة الطلب عبر واتساب
     function orderProduct(name) {
       const msg = encodeURIComponent(`مرحباً، أريد طلب المنتج: ${name}`);
       window.open(`https://wa.me/201110666981?text=${msg}`, '_blank');
     }
 
-    document.addEventListener('DOMContentLoaded', renderProducts);
+    // تحميل المنتجات من products.json
+    async function loadProducts() {
+      let list = null;
+
+      try {
+        // كسر التخزين المؤقت دائمًا لضمان أحدث نسخة
+        const res = await fetch('products.json?v=' + Date.now(), { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          // دعم صيغتين: مصفوفة مباشرة أو كائن يحتوي على products
+          if (Array.isArray(data)) {
+            list = data;
+          } else if (data && Array.isArray(data.products)) {
+            list = data.products;
+          }
+        } else {
+          console.warn('⚠️ لم يتم العثور على products.json (HTTP ' + res.status + '). سيتم استخدام المنتجات الافتراضية.');
+        }
+      } catch (err) {
+        console.warn('⚠️ تعذر تحميل products.json:', err);
+      }
+
+      // إذا فشل التحميل أو كان الملف فارغًا → استخدم الافتراضي
+      if (!Array.isArray(list) || list.length === 0) {
+        console.info('ℹ️ يتم عرض المنتجات الافتراضية.');
+        list = fallbackProducts;
+      }
+
+      renderProducts(list);
+    }
+
+    // تشغيل عند اكتمال تحميل الصفحة
+    document.addEventListener('DOMContentLoaded', loadProducts);
   </script>
 </body>
 </html>
