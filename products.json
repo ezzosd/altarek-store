@@ -1,1 +1,242 @@
-[]
+let currentProducts = [];
+
+// إعدادات GitHub
+const GH_OWNER = () => document.getElementById('githubOwner').value.trim();
+const GH_REPO = () => document.getElementById('githubRepo').value.trim();
+const GH_TOKEN = () => document.getElementById('githubToken').value.trim();
+const GH_FILE_PATH = 'products.json';
+
+// حفظ الإعدادات في المتصفح (لتجنب كتابتها كل مرة)
+function saveToken() {
+    localStorage.setItem('gh_token', GH_TOKEN());
+    localStorage.setItem('gh_owner', GH_OWNER());
+    localStorage.setItem('gh_repo', GH_REPO());
+    checkTokenStatus();
+}
+
+function loadSettings() {
+    document.getElementById('githubToken').value = localStorage.getItem('gh_token') || '';
+    document.getElementById('githubOwner').value = localStorage.getItem('gh_owner') || '';
+    document.getElementById('githubRepo').value = localStorage.getItem('gh_repo') || '';
+    checkTokenStatus();
+}
+
+function checkTokenStatus() {
+    const status = document.getElementById('tokenStatus');
+    if (GH_TOKEN() && GH_OWNER() && GH_REPO()) {
+        status.innerHTML = '✅ تم إدخال الإعدادات. جاهز للحفظ.';
+        status.style.color = 'green';
+    } else {
+        status.innerHTML = '⚠️ يرجى إدخال التوكن واسم المستودع للحفظ.';
+        status.style.color = 'red';
+    }
+}
+
+// دالة جلب المنتجات من GitHub
+async function fetchProductsFromGitHub() {
+    try {
+        const response = await fetch(`https://api.github.com/repos/${GH_OWNER()}/${GH_REPO()}/contents/${GH_FILE_PATH}`);
+        if (response.status === 404) return { products: [], sha: null };
+        
+        const data = await response.json();
+        const content = atob(data.content); 
+        const products = JSON.parse(decodeURIComponent(escape(content)));
+        return { products: products, sha: data.sha };
+    } catch (error) {
+        console.error('خطأ في جلب المنتجات:', error);
+        return { products: [], sha: null };
+    }
+}
+
+// دالة حفظ المنتجات في GitHub
+async function saveProductsToGitHub(products) {
+    if (!GH_TOKEN() || !GH_OWNER() || !GH_REPO()) {
+        alert('يرجى إدخال إعدادات GitHub أولاً في أعلى الصفحة.');
+        return false;
+    }
+
+    const msgDiv = document.getElementById('formMsg');
+    msgDiv.innerHTML = '⏳ جاري الحفظ في موقعك...';
+    msgDiv.style.color = 'blue';
+
+    try {
+        // 1. جلب الـ sha الحالي (مطلوب لتحديث الملف)
+        const { sha } = await fetchProductsFromGitHub();
+
+        // 2. تحويل البيانات إلى Base64 مع دعم اللغة العربية
+        const contentString = JSON.stringify(products, null, 2);
+        const contentBase64 = btoa(unescape(encodeURIComponent(contentString)));
+
+        // 3. إرسال الطلب إلى GitHub
+        const response = await fetch(`https://api.github.com/repos/${GH_OWNER()}/${GH_REPO()}/contents/${GH_FILE_PATH}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${GH_TOKEN()}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: 'تحديث المنتجات من لوحة التحكم',
+                content: contentBase64,
+                sha: sha || undefined
+            })
+        });
+
+        if (response.ok) {
+            msgDiv.innerHTML = '✅ تم الحفظ بنجاح! سيظهر المنتج في المتجر خلال دقيقة.';
+            msgDiv.style.color = 'green';
+            // تحديث الجدول
+            renderTable(products);
+            resetForm();
+            return true;
+        } else {
+            const err = await response.json();
+            throw new Error(err.message);
+        }
+    } catch (error) {
+        console.error('خطأ في الحفظ:', error);
+        msgDiv.innerHTML = `❌ فشل الحفظ: ${error.message}`;
+        msgDiv.style.color = 'red';
+        return false;
+    }
+}
+
+// دالة عرض الجدول
+function renderTable(products) {
+    const tbody = document.getElementById('productsTableBody');
+    tbody.innerHTML = '';
+    if (products.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">لا توجد منتجات. أضف منتجك الأول!</td></tr>';
+        return;
+    }
+    products.forEach(product => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><img src="${product.image}" class="product-img" alt="${product.name}"></td>
+            <td>${product.name}</td>
+            <td>${product.price} ج.م</td>
+            <td>
+                <button class="btn btn-edit" onclick="editProduct('${product.id}')">تعديل</button>
+                <button class="btn btn-danger" onclick="deleteProduct('${product.id}')">حذف</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// معاينة الصورة عند اختيارها من الجهاز
+document.getElementById('prodImageFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            document.getElementById('imagePreview').innerHTML = `<img src="${event.target.result}" style="height:80px; border-radius:8px;">`;
+            document.getElementById('prodImageUrl').value = ''; // مسح الرابط إذا تم اختيار ملف
+        };
+        reader.readAsDataURL(file); // تحويل الصورة إلى Base64
+    }
+});
+
+// التعامل مع إرسال النموذج
+document.getElementById('productForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const id = document.getElementById('prodId').value;
+    const name = document.getElementById('prodName').value;
+    const category = document.getElementById('prodCategory').value;
+    const price = document.getElementById('prodPrice').value;
+    const oldPrice = document.getElementById('prodOldPrice').value;
+    const video = document.getElementById('prodVideo').value;
+    const description = document.getElementById('prodDesc').value;
+    
+    let image = document.getElementById('prodImageUrl').value;
+    const fileInput = document.getElementById('prodImageFile');
+    
+    // إذا تم اختيار صورة من الجهاز
+    if (fileInput.files.length > 0 && !image) {
+        const file = fileInput.files[0];
+        if (file.size > 500 * 1024) { // إذا كانت الصورة أكبر من 500 كيلوبايت
+            alert('حجم الصورة كبير جداً (أكثر من 500 كيلوبايت). يرجى اختيار صورة أصغر.');
+            return;
+        }
+        image = await toBase64(file);
+    } else if (!image) {
+        alert('يرجى رفع صورة أو وضع رابط صورة.');
+        return;
+    }
+
+    let products = [...currentProducts];
+
+    if (id) {
+        const index = products.findIndex(p => p.id === id);
+        if (index !== -1) products[index] = { ...products[index], name, category, price, oldPrice, image, video, description };
+    } else {
+        products.push({ id: Date.now().toString(), name, category, price, oldPrice, image, video, description });
+    }
+
+    // حفظ في GitHub
+    await saveProductsToGitHub(products);
+    currentProducts = products; // تحديث الذاكرة المحلية
+});
+
+// تحويل الملف إلى Base64
+function toBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+
+function resetForm() {
+    document.getElementById('productForm').reset();
+    document.getElementById('prodId').value = '';
+    document.getElementById('formTitle').innerText = 'إضافة منتج جديد';
+    document.getElementById('imagePreview').innerHTML = '';
+    document.getElementById('formMsg').innerHTML = '';
+}
+
+function editProduct(id) {
+    const product = currentProducts.find(p => p.id === id);
+    if (product) {
+        document.getElementById('prodId').value = product.id;
+        document.getElementById('prodName').value = product.name;
+        document.getElementById('prodCategory').value = product.category;
+        document.getElementById('prodPrice').value = product.price;
+        document.getElementById('prodOldPrice').value = product.oldPrice || '';
+        document.getElementById('prodVideo').value = product.video || '';
+        document.getElementById('prodDesc').value = product.description || '';
+        
+        // إذا كانت الصورة Base64 (مرفوعة) لا نضعها في حقل الرابط
+        if (!product.image.startsWith('data:image')) {
+            document.getElementById('prodImageUrl').value = product.image;
+            document.getElementById('imagePreview').innerHTML = `<img src="${product.image}" style="height:80px; border-radius:8px;">`;
+        } else {
+            document.getElementById('imagePreview').innerHTML = `<img src="${product.image}" style="height:80px; border-radius:8px;"><br><small style="color:red">صورة مرفوعة من الجهاز (لن تظهر هنا عند التعديل، ارفع صورة جديدة إذا أردت التغيير)</small>`;
+        }
+        
+        document.getElementById('formTitle').innerText = 'تعديل المنتج';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+async function deleteProduct(id) {
+    if (confirm('هل أنت متأكد من حذف هذا المنتج نهائياً من الموقع؟')) {
+        let products = currentProducts.filter(p => p.id !== id);
+        await saveProductsToGitHub(products);
+        currentProducts = products;
+    }
+}
+
+// تشغيل عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', async () => {
+    loadSettings();
+    if (GH_TOKEN() && GH_OWNER() && GH_REPO()) {
+        const { products } = await fetchProductsFromGitHub();
+        currentProducts = products;
+        renderTable(products);
+    } else {
+        document.getElementById('productsTableBody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">يرجى إدخال إعدادات GitHub أولاً لجلب المنتجات.</td></tr>';
+    }
+});
