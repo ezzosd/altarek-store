@@ -2,13 +2,14 @@
 if (!document.getElementById('githubToken')) {
     console.log("Not admin page");
 } else {
-    // باقي كود لوحة التحكم
     let currentProducts = [];
+    const GH_FILE_PATH = 'products.json';
+    const GH_BRANCH = 'main';
+
+    // دوال جلب القيم مباشرة من الخانات
     const GH_OWNER = () => document.getElementById('githubOwner').value.trim();
     const GH_REPO = () => document.getElementById('githubRepo').value.trim();
     const GH_TOKEN = () => document.getElementById('githubToken').value.trim();
-    const GH_FILE_PATH = 'products.json';
-    const GH_BRANCH = 'main';
 
     window.saveToken = function() {
         localStorage.setItem('gh_token', GH_TOKEN());
@@ -19,8 +20,8 @@ if (!document.getElementById('githubToken')) {
 
     function loadSettings() {
         document.getElementById('githubToken').value = localStorage.getItem('gh_token') || '';
-        document.getElementById('githubOwner').value = localStorage.getItem('gh_owner') || '';
-        document.getElementById('githubRepo').value = localStorage.getItem('gh_repo') || '';
+        document.getElementById('githubOwner').value = localStorage.getItem('gh_owner') || 'ezzosd'; // وضع اسمك كافتراضي
+        document.getElementById('githubRepo').value = localStorage.getItem('gh_repo') || 'altarek-store'; // وضع اسم المستودع كافتراضي
         checkTokenStatus();
     }
 
@@ -30,7 +31,7 @@ if (!document.getElementById('githubToken')) {
             status.innerHTML = '✅ جاهز للحفظ.';
             status.style.color = 'green';
         } else {
-            status.innerHTML = '⚠️ يرجى إدخال الإعدادات.';
+            status.innerHTML = '⚠️ يرجى إدخال جميع الإعدادات (التوكن، المستخدم، المستودع).';
             status.style.color = 'red';
         }
     }
@@ -41,8 +42,10 @@ if (!document.getElementById('githubToken')) {
                 headers: { 'Authorization': `token ${GH_TOKEN()}` }
             });
             if (response.status === 404) return { products: [], sha: null };
+            
             const data = await response.json();
             if (data.message) throw new Error(data.message);
+            
             const content = decodeURIComponent(escape(atob(data.content)));
             return { products: JSON.parse(content), sha: data.sha };
         } catch (error) {
@@ -55,10 +58,19 @@ if (!document.getElementById('githubToken')) {
         const msgDiv = document.getElementById('formMsg');
         const saveBtn = document.getElementById('saveBtn');
         
-        if (!GH_TOKEN() || !GH_OWNER() || !GH_REPO()) {
-            alert('❌ يرجى إدخال إعدادات GitHub أولاً.');
+        // التحقق الدقيق من الخانات
+        let missingFields = [];
+        if (!GH_OWNER()) missingFields.push('اسم المستخدم (Owner)');
+        if (!GH_REPO()) missingFields.push('اسم المستودع (Repo)');
+        if (!GH_TOKEN()) missingFields.push('التوكن (Token)');
+
+        if (missingFields.length > 0) {
+            alert(`❌ لا يمكن الحفظ!\nيرجى ملء الخانات التالية في أعلى الصفحة:\n- ${missingFields.join('\n- ')}`);
             return false;
         }
+
+        // حفظ الإعدادات في الذاكرة احتياطياً
+        saveToken();
 
         saveBtn.disabled = true;
         saveBtn.innerText = '⏳ جاري الحفظ...';
