@@ -10,13 +10,14 @@
 <style>
   /* --- إعدادات الألوان والخطوط --- */
   :root {
-    --primary: #7a1e2e; /* لون الشعار العنابي */
+    --primary: #7a1e2e;
     --primary-dark: #5c131f;
-    --dark: #1a1a1a; /* الأسود */
+    --dark: #1a1a1a;
     --light: #f8fafc;
     --white: #ffffff;
     --gray: #64748b;
     --whatsapp: #25d366;
+    --facebook: #1877f2;
     --font: 'Tajawal', sans-serif;
   }
 
@@ -44,7 +45,7 @@
   .brand img { height: 55px; width: auto; }
   .nav-links { display: flex; gap: 25px; font-weight: 700; }
   .nav-links a:hover { color: var(--primary); }
-  .header-actions { display: flex; gap: 15px; align-items: center; }
+  .header-actions { display: flex; gap: 12px; align-items: center; }
   .btn-cart {
     background: var(--primary);
     color: var(--white);
@@ -54,6 +55,14 @@
     transition: 0.3s;
   }
   .btn-cart:hover { background: var(--primary-dark); }
+  .btn-social-header {
+    color: var(--facebook);
+    font-size: 20px;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+  }
+  .btn-social-header:hover { color: var(--primary); transform: scale(1.1); }
 
   /* --- القسم الرئيسي (Hero Section) --- */
   .hero {
@@ -61,7 +70,6 @@
     color: var(--white);
     padding: 80px 20px;
     text-align: center;
-    position: relative;
   }
   .hero h1 { font-size: 42px; font-weight: 900; margin-bottom: 15px; }
   .hero p { font-size: 18px; margin-bottom: 30px; color: #e2e8f0; max-width: 600px; margin-left: auto; margin-right: auto; }
@@ -169,6 +177,8 @@
   }
   .contact-card a:hover { color: var(--primary); font-weight: 700; }
   .contact-card .address { direction: rtl; }
+  .contact-card.facebook-card .contact-icon { color: var(--facebook); }
+  .contact-card.facebook-card a:hover { color: var(--facebook); }
 
   /* --- الفوتر (Footer) --- */
   .footer {
@@ -178,7 +188,18 @@
     padding: 30px 20px;
   }
   .footer p { color: #94a3b8; font-size: 14px; margin-bottom: 8px; }
-  .footer-phone { font-weight: 700; color: var(--white); direction: ltr; display: inline-block; }
+  .footer-social {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+  }
+  .footer-social a {
+    color: #94a3b8;
+    font-size: 20px;
+    transition: 0.3s;
+  }
+  .footer-social a:hover { color: var(--white); }
 
   /* --- زر الواتساب العائم (Floating WhatsApp) --- */
   .whatsapp-float {
@@ -222,6 +243,9 @@
         <a href="#contact">اتصل بنا</a>
       </nav>
       <div class="header-actions">
+        <a href="https://www.facebook.com/profile.php?id=61562790860633" target="_blank" class="btn-social-header" aria-label="فيسبوك">
+          📘
+        </a>
         <a href="#" class="btn-cart">🛒 سلة المشتريات</a>
       </div>
     </div>
@@ -275,7 +299,7 @@
     </div>
   </section>
 
-  <!-- قسم التواصل (بياناتك الجديدة) -->
+  <!-- قسم التواصل -->
   <h2 id="contact" class="section-title">تواصل معنا</h2>
   <section class="contact-section">
     
@@ -292,6 +316,13 @@
       <h3>واتساب</h3>
       <a href="https://wa.me/201110666981" target="_blank" dir="ltr">01110666981</a>
       <a href="https://wa.me/201068640790" target="_blank" dir="ltr">01068640790</a>
+    </div>
+
+    <!-- فيسبوك (جديد) -->
+    <div class="contact-card facebook-card">
+      <div class="contact-icon">📘</div>
+      <h3>فيسبوك</h3>
+      <a href="https://www.facebook.com/profile.php?id=61562790860633" target="_blank" dir="ltr">Altarek Agency</a>
     </div>
 
     <!-- البريد الإلكتروني -->
@@ -313,7 +344,13 @@
   <!-- الفوتر -->
   <footer class="footer">
     <p>جميع الحقوق محفوظة © وكالة الطارق لتجارة رولمان البلي 2024</p>
-    <p>العنوان: 15 شارع شامبليون - القاهرة - وسط البلد | هاتف: <span class="footer-phone">0225764191</span></p>
+    <p>العنوان: 15 شارع شامبليون - القاهرة - وسط البلد | هاتف: <span dir="ltr">0225764191</span></p>
+    
+    <!-- روابط التواصل الاجتماعي في الفوتر -->
+    <div class="footer-social">
+      <a href="https://www.facebook.com/profile.php?id=61562790860633" target="_blank" aria-label="فيسبوك">📘</a>
+      <a href="https://wa.me/201110666981" target="_blank" aria-label="واتساب">🟢</a>
+    </div>
   </footer>
 
   <!-- زر الواتساب العائم -->
