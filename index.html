@@ -10,7 +10,7 @@
 <style>
   /* --- إعدادات الألوان والخطوط --- */
   :root {
-    --primary: #7a1e2e;
+    --primary: #7a1e2e; /* لون الشعار العنابي */
     --primary-dark: #5c131f;
     --dark: #1a1a1a;
     --light: #f8fafc;
@@ -85,7 +85,7 @@
   }
   .btn-primary:hover { background: var(--primary); color: var(--white); transform: translateY(-3px); }
 
-  /* --- أقسام المنتجات (Categories) --- */
+  /* --- العناوين العامة للأقسام --- */
   .section-title {
     text-align: center;
     font-size: 28px;
@@ -98,10 +98,12 @@
     content: ''; display: block; width: 60px; height: 4px;
     background: var(--primary); margin: 10px auto 0; border-radius: 2px;
   }
+
+  /* --- أقسام المنتجات (Categories) --- */
   .categories {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px 60px;
+    padding: 0 20px 30px;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 25px;
@@ -124,6 +126,112 @@
   .category-icon { font-size: 45px; margin-bottom: 15px; color: var(--primary); }
   .category-card h3 { font-size: 20px; font-weight: 800; margin-bottom: 10px; }
   .category-card p { color: var(--gray); font-size: 14px; }
+
+  /* --- قسم المنتجات (Products Grid) --- */
+  .products-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 25px;
+  }
+  .product-card {
+    background: var(--white);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    transition: 0.3s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(122, 30, 46, 0.1);
+    border-color: var(--primary);
+  }
+  .product-image {
+    width: 100%;
+    height: 200px;
+    background: #f1f5f9;
+    position: relative;
+  }
+  .product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--primary);
+    color: var(--white);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .product-info {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+  .product-category {
+    font-size: 12px;
+    color: var(--gray);
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+  .product-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--dark);
+    margin-bottom: 15px;
+    line-height: 1.4;
+    flex-grow: 1;
+  }
+  .product-price {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  .current-price {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--primary);
+  }
+  .old-price {
+    font-size: 14px;
+    color: #94a3b8;
+    text-decoration: line-through;
+    font-weight: 500;
+  }
+  .btn-order {
+    width: 100%;
+    background: var(--light);
+    color: var(--dark);
+    border: 1px solid #e2e8f0;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+  }
+  .btn-order:hover {
+    background: var(--whatsapp);
+    color: var(--white);
+    border-color: var(--whatsapp);
+  }
 
   /* --- مميزات المتجر (Features) --- */
   .features {
@@ -238,7 +346,7 @@
       </a>
       <nav class="nav-links">
         <a href="index.html">الرئيسية</a>
-        <a href="#">المنتجات</a>
+        <a href="#products">المنتجات</a>
         <a href="#">عن الوكالة</a>
         <a href="#contact">اتصل بنا</a>
       </nav>
@@ -255,7 +363,7 @@
   <section class="hero">
     <h1>وكالة الطارق لتجارة رولمان البلي</h1>
     <p>وجهتك الأولى لأفضل أنواع رولمان البلي (الرمانات) للسيارات، الدراجات، والمعدات الصناعية. جودة أصلية وأسعار تنافسية.</p>
-    <a href="#" class="btn-primary">تسوق الآن</a>
+    <a href="#products" class="btn-primary">تسوق الآن</a>
   </section>
 
   <!-- أقسام المنتجات -->
@@ -276,6 +384,83 @@
       <h3>رولمان بلي دراجات</h3>
       <p>رمانات خفيفة وعالية الأداء للدراجات النارية</p>
     </div>
+  </section>
+
+  <!-- قسم المنتجات المميزة (البند الثاني) -->
+  <h2 id="products" class="section-title">أحدث المنتجات</h2>
+  <section class="products-grid">
+    
+    <!-- المنتج الأول -->
+    <div class="product-card">
+      <div class="product-image">
+        <img src="https://images.unsplash.com/photo-1599563615151-3551a416638b?q=80&w=600&auto=format&fit=crop" alt="رولمان بلي">
+        <span class="badge">خصم 10%</span>
+      </div>
+      <div class="product-info">
+        <span class="product-category">رولمان بلي سيارات</span>
+        <h3 class="product-title">رمان بلي عجل أمامي - تويوتا</h3>
+        <div class="product-price">
+          <span class="current-price">150 ج.م</span>
+          <span class="old-price">180 ج.م</span>
+        </div>
+        <a href="https://wa.me/201110666981?text=مرحباً، أريد الاستفسار عن: رمان بلي عجل أمامي - تويوتا" target="_blank" class="btn-order">
+          <span>اطلب عبر واتساب</span> 🟢
+        </a>
+      </div>
+    </div>
+
+    <!-- المنتج الثاني -->
+    <div class="product-card">
+      <div class="product-image">
+        <img src="https://images.unsplash.com/photo-1615906655593-ad0386982a0f?q=80&w=600&auto=format&fit=crop" alt="رولمان بلي">
+      </div>
+      <div class="product-info">
+        <span class="product-category">رولمان بلي صناعي</span>
+        <h3 class="product-title">رولمان بلي ثقيل - خط إنتاج</h3>
+        <div class="product-price">
+          <span class="current-price">350 ج.م</span>
+        </div>
+        <a href="https://wa.me/201110666981?text=مرحباً، أريد الاستفسار عن: رولمان بلي ثقيل - خط إنتاج" target="_blank" class="btn-order">
+          <span>اطلب عبر واتساب</span> 🟢
+        </a>
+      </div>
+    </div>
+
+    <!-- المنتج الثالث -->
+    <div class="product-card">
+      <div class="product-image">
+        <img src="https://images.unsplash.com/photo-1620841289424-7276db82b2a6?q=80&w=600&auto=format&fit=crop" alt="رولمان بلي">
+        <span class="badge">جديد</span>
+      </div>
+      <div class="product-info">
+        <span class="product-category">رولمان بلي دراجات</span>
+        <h3 class="product-title">طقم رمان بلي دراجة نارية - هوندا</h3>
+        <div class="product-price">
+          <span class="current-price">85 ج.م</span>
+        </div>
+        <a href="https://wa.me/201110666981?text=مرحباً، أريد الاستفسار عن: طقم رمان بلي دراجة نارية - هوندا" target="_blank" class="btn-order">
+          <span>اطلب عبر واتساب</span> 🟢
+        </a>
+      </div>
+    </div>
+
+    <!-- المنتج الرابع -->
+    <div class="product-card">
+      <div class="product-image">
+        <img src="https://images.unsplash.com/photo-1555626906-fcf10d6851b4?q=80&w=600&auto=format&fit=crop" alt="رولمان بلي">
+      </div>
+      <div class="product-info">
+        <span class="product-category">رولمان بلي سيارات</span>
+        <h3 class="product-title">رمان بلي خلفي - هيونداي / كيا</h3>
+        <div class="product-price">
+          <span class="current-price">120 ج.م</span>
+        </div>
+        <a href="https://wa.me/201110666981?text=مرحباً، أريد الاستفسار عن: رمان بلي خلفي - هيونداي / كيا" target="_blank" class="btn-order">
+          <span>اطلب عبر واتساب</span> 🟢
+        </a>
+      </div>
+    </div>
+
   </section>
 
   <!-- مميزات المتجر -->
@@ -318,7 +503,7 @@
       <a href="https://wa.me/201068640790" target="_blank" dir="ltr">01068640790</a>
     </div>
 
-    <!-- فيسبوك (جديد) -->
+    <!-- فيسبوك -->
     <div class="contact-card facebook-card">
       <div class="contact-icon">📘</div>
       <h3>فيسبوك</h3>
