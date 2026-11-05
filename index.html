@@ -3,153 +3,125 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>لوحة التحكم | وكالة الطارق</title>
+<title>وكالة الطارق | لتجارة رولمان البلي</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root { --primary: #7a1e2e; --primary-dark: #5c131f; --dark: #1a1a1a; --light: #f8fafc; --white: #ffffff; --gray: #64748b; --border: #e2e8f0; }
+  :root { --primary: #7a1e2e; --primary-dark: #5c131f; --dark: #1a1a1a; --light: #f8fafc; --white: #ffffff; --gray: #64748b; --whatsapp: #25d366; --facebook: #1877f2; }
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
-  body { background: var(--light); color: var(--dark); }
+  body { background-color: var(--light); color: var(--dark); line-height: 1.6; }
   a { text-decoration: none; color: inherit; }
-  
-  .header { background: var(--white); padding: 15px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; }
-  .brand img { height: 50px; }
-  .btn-store { background: var(--primary); color: white; padding: 8px 20px; border-radius: 8px; font-weight: 700; }
-
-  .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
-  .card { background: var(--white); border-radius: 12px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 30px; border: 1px solid var(--border); }
-  h2 { font-size: 22px; margin-bottom: 20px; border-bottom: 2px solid var(--primary); display: inline-block; padding-bottom: 5px; }
-
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-  @media(max-width: 768px) { .form-grid { grid-template-columns: 1fr; } .full { grid-column: span 1 !important; } }
-  .full { grid-column: span 2; }
-
-  label { display: block; margin-bottom: 5px; font-weight: 700; font-size: 14px; }
-  input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; }
-  input:focus, textarea:focus { outline: none; border-color: var(--primary); }
-  textarea { resize: vertical; height: 80px; }
-
-  .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-family: inherit; transition: 0.3s; }
-  .btn-primary { background: var(--primary); color: white; }
-  .btn-primary:hover { background: var(--primary-dark); }
-  .btn-danger { background: #ef4444; color: white; padding: 6px 12px; font-size: 13px; }
-  .btn-edit { background: #3b82f6; color: white; padding: 6px 12px; font-size: 13px; }
-
-  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-  th, td { padding: 12px; border-bottom: 1px solid var(--border); text-align: right; }
-  th { background: var(--light); font-weight: 800; }
-  .product-img { width: 40px; height: 40px; object-fit: cover; border-radius: 5px; }
-  
-  .hidden-section { display: none; padding: 20px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; margin-bottom: 20px; }
+  .header { background: var(--white); box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+  .header-container { max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand img { height: 55px; }
+  .nav-links { display: flex; gap: 25px; font-weight: 700; }
+  .nav-links a:hover { color: var(--primary); }
+  .header-actions { display: flex; gap: 12px; align-items: center; }
+  .btn-cart { background: var(--primary); color: var(--white); padding: 8px 18px; border-radius: 8px; font-weight: 700; transition: 0.3s; }
+  .btn-cart:hover { background: var(--primary-dark); }
+  .btn-social-header { color: var(--facebook); font-size: 20px; }
+  .btn-social-header:hover { color: var(--primary); }
+  .hero { background: linear-gradient(135deg, var(--dark) 0%, var(--primary-dark) 100%); color: var(--white); padding: 80px 20px; text-align: center; }
+  .hero h1 { font-size: 42px; font-weight: 900; margin-bottom: 15px; }
+  .hero p { font-size: 18px; margin-bottom: 30px; color: #e2e8f0; max-width: 600px; margin: 0 auto 30px; }
+  .btn-primary { background: var(--white); color: var(--primary); padding: 14px 40px; border-radius: 8px; font-size: 18px; font-weight: 800; display: inline-block; transition: 0.3s; }
+  .btn-primary:hover { background: var(--primary); color: var(--white); transform: translateY(-3px); }
+  .section-title { text-align: center; font-size: 28px; font-weight: 800; margin: 60px 0 30px; color: var(--dark); position: relative; }
+  .section-title::after { content: ''; display: block; width: 60px; height: 4px; background: var(--primary); margin: 10px auto 0; border-radius: 2px; }
+  .categories { max-width: 1200px; margin: 0 auto; padding: 0 20px 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+  .category-card { background: var(--white); border-radius: 12px; padding: 40px 20px; text-align: center; border: 1px solid #e2e8f0; transition: 0.3s; }
+  .category-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(122, 30, 46, 0.1); border-color: var(--primary); }
+  .category-icon { font-size: 45px; margin-bottom: 15px; color: var(--primary); }
+  .category-card h3 { font-size: 20px; font-weight: 800; margin-bottom: 10px; }
+  .products-grid { max-width: 1200px; margin: 0 auto; padding: 0 20px 40px; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
+  .product-card { background: var(--white); border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; transition: 0.3s; display: flex; flex-direction: column; }
+  .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(122, 30, 46, 0.1); border-color: var(--primary); }
+  .product-image { width: 100%; height: 200px; background: #f1f5f9; position: relative; }
+  .product-image img { width: 100%; height: 100%; object-fit: cover; }
+  .badge { position: absolute; top: 10px; right: 10px; background: var(--primary); color: var(--white); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; }
+  .product-info { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
+  .product-category { font-size: 12px; color: var(--gray); font-weight: 700; margin-bottom: 5px; }
+  .product-title { font-size: 16px; font-weight: 800; color: var(--dark); margin-bottom: 15px; flex-grow: 1; }
+  .product-price { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+  .current-price { font-size: 20px; font-weight: 900; color: var(--primary); }
+  .old-price { font-size: 14px; color: #94a3b8; text-decoration: line-through; }
+  .btn-order { width: 100%; background: var(--light); color: var(--dark); border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; }
+  .btn-order:hover { background: var(--whatsapp); color: var(--white); border-color: var(--whatsapp); }
+  .btn-video { background: #ef4444; color: white; padding: 10px 15px; border-radius: 8px; font-weight: 800; display: flex; justify-content: center; align-items: center; transition: 0.3s; border: none; cursor: pointer; }
+  .btn-video:hover { background: #dc2626; }
+  .contact-section { max-width: 1200px; margin: 0 auto; padding: 0 20px 60px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; }
+  .contact-card { background: var(--white); padding: 30px 20px; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0; transition: 0.3s; }
+  .contact-card:hover { border-color: var(--primary); box-shadow: 0 10px 25px rgba(122, 30, 46, 0.1); }
+  .contact-icon { font-size: 35px; margin-bottom: 15px; color: var(--primary); }
+  .contact-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 10px; }
+  .contact-card a, .contact-card p { color: var(--gray); font-size: 15px; display: block; margin-bottom: 5px; }
+  .contact-card a:hover { color: var(--primary); font-weight: 700; }
+  .footer { background: var(--dark); color: var(--white); text-align: center; padding: 30px 20px; }
+  .footer p { color: #94a3b8; font-size: 14px; margin-bottom: 8px; }
+  .footer-social { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
+  .footer-social a { color: #94a3b8; font-size: 20px; transition: 0.3s; }
+  .footer-social a:hover { color: var(--white); }
+  .whatsapp-float { position: fixed; bottom: 30px; left: 30px; background: var(--whatsapp); color: var(--white); width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 35px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); z-index: 1000; transition: 0.3s; }
+  .whatsapp-float:hover { transform: scale(1.1); color: var(--white); }
+  @media (max-width: 768px) { .nav-links { display: none; } .hero h1 { font-size: 32px; } .whatsapp-float { bottom: 20px; left: 20px; width: 50px; height: 50px; font-size: 28px; } }
 </style>
 </head>
 <body>
 
-<header class="header">
-  <a href="index.html" class="brand">
-    <img src="logo.png" alt="شعار">
-    لوحة تحكم الطارق
-  </a>
-  <a href="index.html" class="btn-store">عرض المتجر</a>
-</header>
-
-<div class="container">
-  
-  <!-- إعدادات GitHub -->
-  <div class="card">
-    <h2>إعدادات الاتصال (لحفظ المنتجات)</h2>
-    <p style="font-size:14px; color:var(--gray); margin-bottom:15px;">
-      لحفظ المنتجات في موقعك، تحتاج إلى وضع "توكن" GitHub هنا. (يمكنك الحصول عليه من إعدادات حسابك في GitHub - Developer Settings - Personal Access Tokens).
-    </p>
-    <div class="form-grid">
-      <div class="full">
-        <label>GitHub Personal Access Token (يبدأ بـ ghp_...)</label>
-        <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" onchange="saveToken()">
-      </div>
-      <div>
-        <label>اسم المستخدم (Owner)</label>
-        <input type="text" id="githubOwner" placeholder="ezzosd" onchange="saveToken()">
-      </div>
-      <div>
-        <label>اسم المستودع (Repo)</label>
-        <input type="text" id="githubRepo" placeholder="altarek-agency" onchange="saveToken()">
+  <header class="header">
+    <div class="header-container">
+      <a href="index.html" class="brand">
+        <img src="logo.png" alt="شعار الطارق">
+      </a>
+      <nav class="nav-links">
+        <a href="index.html">الرئيسية</a>
+        <a href="#products">المنتجات</a>
+        <a href="admin.html" style="color:var(--primary);">لوحة التحكم</a>
+        <a href="#contact">اتصل بنا</a>
+      </nav>
+      <div class="header-actions">
+        <a href="https://www.facebook.com/profile.php?id=61562790860633" target="_blank" class="btn-social-header">📘</a>
+        <a href="#" class="btn-cart">🛒 سلة المشتريات</a>
       </div>
     </div>
-    <div id="tokenStatus" style="margin-top:10px; font-size:14px; font-weight:bold;"></div>
-  </div>
+  </header>
 
-  <!-- نموذج إضافة المنتج -->
-  <div class="card">
-    <h2 id="formTitle">إضافة منتج جديد</h2>
-    <form id="productForm">
-      <input type="hidden" id="prodId">
-      <div class="form-grid">
-        <div>
-          <label>اسم المنتج *</label>
-          <input type="text" id="prodName" required placeholder="مثال: رمان بلي تويوتا">
-        </div>
-        <div>
-          <label>التصنيف</label>
-          <select id="prodCategory">
-            <option value="رولمان بلي سيارات">رولمان بلي سيارات</option>
-            <option value="رولمان بلي صناعي">رولمان بلي صناعي</option>
-            <option value="رولمان بلي دراجات">رولمان بلي دراجات</option>
-          </select>
-        </div>
-        <div>
-          <label>السعر *</label>
-          <input type="number" id="prodPrice" required placeholder="150">
-        </div>
-        <div>
-          <label>السعر قبل الخصم (اختياري)</label>
-          <input type="number" id="prodOldPrice" placeholder="180">
-        </div>
-        
-        <!-- رفع صورة من الجهاز -->
-        <div class="full">
-          <label>صورة المنتج *</label>
-          <div style="display:flex; gap:10px;">
-            <input type="file" id="prodImageFile" accept="image/*" style="flex:1;">
-            <span style="align-self:center; color:var(--gray);">أو</span>
-            <input type="url" id="prodImageUrl" placeholder="رابط صورة (https://...)" style="flex:1;">
-          </div>
-          <div id="imagePreview" style="margin-top:10px;"></div>
-        </div>
+  <section class="hero">
+    <h1>وكالة الطارق لتجارة رولمان البلي</h1>
+    <p>وجهتك الأولى لأفضل أنواع رولمان البلي (الرمانات) للسيارات، الدراجات، والمعدات الصناعية. جودة أصلية وأسعار تنافسية.</p>
+    <a href="#products" class="btn-primary">تسوق الآن</a>
+  </section>
 
-        <div class="full">
-          <label>رابط فيديو قصير (يوتيوب أو MP4) - اختياري</label>
-          <input type="url" id="prodVideo" placeholder="https://youtube.com/...">
-        </div>
-        <div class="full">
-          <label>الوصف</label>
-          <textarea id="prodDesc" placeholder="وصف تفصيلي للمنتج..."></textarea>
-        </div>
-        <div class="full">
-          <button type="submit" class="btn btn-primary" id="saveBtn">حفظ المنتج في الموقع</button>
-          <button type="button" class="btn" style="background:#e2e8f0; color:#333" onclick="resetForm()">إلغاء / تفريغ</button>
-        </div>
-      </div>
-    </form>
-    <div id="formMsg" style="margin-top:15px; font-weight:bold;"></div>
-  </div>
+  <h2 class="section-title">تصفح الأقسام</h2>
+  <section class="categories">
+    <div class="category-card"><div class="category-icon">🚗</div><h3>رولمان بلي سيارات</h3></div>
+    <div class="category-card"><div class="category-icon">🏭</div><h3>رولمان بلي صناعي</h3></div>
+    <div class="category-card"><div class="category-icon">🚲</div><h3>رولمان بلي دراجات</h3></div>
+  </section>
 
-  <!-- جدول المنتجات -->
-  <div class="card">
-    <h2>المنتجات الحالية</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>الصورة</th>
-          <th>الاسم</th>
-          <th>السعر</th>
-          <th>إجراءات</th>
-        </tr>
-      </thead>
-      <tbody id="productsTableBody"></tbody>
-    </table>
-  </div>
-</div>
+  <h2 id="products" class="section-title">أحدث المنتجات</h2>
+  <section class="products-grid" id="storeProducts"></section>
 
-<script src="admin.js"></script>
+  <h2 id="contact" class="section-title">تواصل معنا</h2>
+  <section class="contact-section">
+    <div class="contact-card"><div class="contact-icon">📞</div><h3>الهاتف</h3><a href="tel:0225764191" dir="ltr">0225764191</a></div>
+    <div class="contact-card"><div class="contact-icon" style="color: var(--whatsapp);">🟢</div><h3>واتساب</h3><a href="https://wa.me/201110666981" target="_blank" dir="ltr">01110666981</a><a href="https://wa.me/201068640790" target="_blank" dir="ltr">01068640790</a></div>
+    <div class="contact-card"><div class="contact-icon" style="color: var(--facebook);">📘</div><h3>فيسبوك</h3><a href="https://www.facebook.com/profile.php?id=61562790860633" target="_blank">Altarek Agency</a></div>
+    <div class="contact-card"><div class="contact-icon">✉️</div><h3>البريد الإلكتروني</h3><a href="mailto:TAREK58334@GMAIL.COM" dir="ltr">TAREK58334@GMAIL.COM</a></div>
+    <div class="contact-card"><div class="contact-icon">📍</div><h3>العنوان</h3><p>15 شارع شامبليون - القاهرة - وسط البلد</p></div>
+  </section>
+
+  <footer class="footer">
+    <p>جميع الحقوق محفوظة © وكالة الطارق لتجارة رولمان البلي 2024</p>
+    <div class="footer-social">
+      <a href="https://www.facebook.com/profile.php?id=61562790860633">📘</a>
+      <a href="https://wa.me/201110666981">🟢</a>
+    </div>
+  </footer>
+
+  <a href="https://wa.me/201110666981" class="whatsapp-float" target="_blank">💬</a>
+
+  <!-- ربط ملف المتجر فقط -->
+  <script src="app.js"></script>
 </body>
 </html>
