@@ -10,61 +10,48 @@
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
   body { background: var(--light); color: var(--dark); }
   a { text-decoration: none; color: inherit; }
-  
   .header { background: var(--white); padding: 15px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
   .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; }
   .brand img { height: 50px; }
   .btn-store { background: var(--primary); color: white; padding: 8px 20px; border-radius: 8px; font-weight: 700; }
-
   .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
   .card { background: var(--white); border-radius: 12px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 30px; border: 1px solid var(--border); }
   h2 { font-size: 22px; margin-bottom: 20px; border-bottom: 2px solid var(--primary); display: inline-block; padding-bottom: 5px; }
-
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
   @media(max-width: 768px) { .form-grid { grid-template-columns: 1fr; } .full { grid-column: span 1 !important; } }
   .full { grid-column: span 2; }
-
   label { display: block; margin-bottom: 5px; font-weight: 700; font-size: 14px; }
   input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; }
   input:focus, textarea:focus { outline: none; border-color: var(--primary); }
   textarea { resize: vertical; height: 80px; }
-
   .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-family: inherit; transition: 0.3s; }
   .btn-primary { background: var(--primary); color: white; }
   .btn-primary:hover { background: var(--primary-dark); }
   .btn-danger { background: #ef4444; color: white; padding: 6px 12px; font-size: 13px; }
   .btn-edit { background: #3b82f6; color: white; padding: 6px 12px; font-size: 13px; }
-
   table { width: 100%; border-collapse: collapse; margin-top: 15px; }
   th, td { padding: 12px; border-bottom: 1px solid var(--border); text-align: right; }
   th { background: var(--light); font-weight: 800; }
   .product-img { width: 40px; height: 40px; object-fit: cover; border-radius: 5px; }
-  
-  .hidden-section { display: none; padding: 20px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; margin-bottom: 20px; }
 </style>
 </head>
 <body>
 
 <header class="header">
   <a href="index.html" class="brand">
-    <img src="logo.png" alt="شعار">
-    لوحة تحكم الطارق
+    <img src="logo.png" alt="شعار">لوحة تحكم الطارق
   </a>
   <a href="index.html" class="btn-store">عرض المتجر</a>
 </header>
 
 <div class="container">
-  
-  <!-- إعدادات GitHub -->
   <div class="card">
     <h2>إعدادات الاتصال (لحفظ المنتجات)</h2>
-    <p style="font-size:14px; color:var(--gray); margin-bottom:15px;">
-      لحفظ المنتجات في موقعك، تحتاج إلى وضع "توكن" GitHub هنا. (يمكنك الحصول عليه من إعدادات حسابك في GitHub - Developer Settings - Personal Access Tokens).
-    </p>
+    <p style="font-size:14px; color:var(--gray); margin-bottom:15px;">لحفظ المنتجات في موقعك، تحتاج إلى وضع توكن GitHub هنا.</p>
     <div class="form-grid">
       <div class="full">
-        <label>GitHub Personal Access Token (يبدأ بـ ghp_...)</label>
-        <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" onchange="saveToken()">
+        <label>GitHub Personal Access Token</label>
+        <input type="password" id="githubToken" placeholder="ghp_..." onchange="saveToken()">
       </div>
       <div>
         <label>اسم المستخدم (Owner)</label>
@@ -72,22 +59,18 @@
       </div>
       <div>
         <label>اسم المستودع (Repo)</label>
-        <input type="text" id="githubRepo" placeholder="altarek-agency" onchange="saveToken()">
+        <input type="text" id="githubRepo" placeholder="altarek-store" onchange="saveToken()">
       </div>
     </div>
     <div id="tokenStatus" style="margin-top:10px; font-size:14px; font-weight:bold;"></div>
   </div>
 
-  <!-- نموذج إضافة المنتج -->
   <div class="card">
     <h2 id="formTitle">إضافة منتج جديد</h2>
     <form id="productForm">
       <input type="hidden" id="prodId">
       <div class="form-grid">
-        <div>
-          <label>اسم المنتج *</label>
-          <input type="text" id="prodName" required placeholder="مثال: رمان بلي تويوتا">
-        </div>
+        <div><label>اسم المنتج *</label><input type="text" id="prodName" required></div>
         <div>
           <label>التصنيف</label>
           <select id="prodCategory">
@@ -96,60 +79,38 @@
             <option value="رولمان بلي دراجات">رولمان بلي دراجات</option>
           </select>
         </div>
-        <div>
-          <label>السعر *</label>
-          <input type="number" id="prodPrice" required placeholder="150">
-        </div>
-        <div>
-          <label>السعر قبل الخصم (اختياري)</label>
-          <input type="number" id="prodOldPrice" placeholder="180">
-        </div>
-        
-        <!-- رفع صورة من الجهاز -->
+        <div><label>السعر *</label><input type="number" id="prodPrice" required></div>
+        <div><label>السعر قبل الخصم</label><input type="number" id="prodOldPrice"></div>
         <div class="full">
           <label>صورة المنتج *</label>
           <div style="display:flex; gap:10px;">
             <input type="file" id="prodImageFile" accept="image/*" style="flex:1;">
-            <span style="align-self:center; color:var(--gray);">أو</span>
-            <input type="url" id="prodImageUrl" placeholder="رابط صورة (https://...)" style="flex:1;">
+            <span style="align-self:center;">أو</span>
+            <input type="url" id="prodImageUrl" placeholder="رابط صورة" style="flex:1;">
           </div>
           <div id="imagePreview" style="margin-top:10px;"></div>
         </div>
-
-        <div class="full">
-          <label>رابط فيديو قصير (يوتيوب أو MP4) - اختياري</label>
-          <input type="url" id="prodVideo" placeholder="https://youtube.com/...">
-        </div>
-        <div class="full">
-          <label>الوصف</label>
-          <textarea id="prodDesc" placeholder="وصف تفصيلي للمنتج..."></textarea>
-        </div>
+        <div class="full"><label>رابط فيديو (اختياري)</label><input type="url" id="prodVideo"></div>
+        <div class="full"><label>الوصف</label><textarea id="prodDesc"></textarea></div>
         <div class="full">
           <button type="submit" class="btn btn-primary" id="saveBtn">حفظ المنتج في الموقع</button>
-          <button type="button" class="btn" style="background:#e2e8f0; color:#333" onclick="resetForm()">إلغاء / تفريغ</button>
+          <button type="button" class="btn" style="background:#e2e8f0; color:#333" onclick="resetForm()">إلغاء</button>
         </div>
       </div>
     </form>
     <div id="formMsg" style="margin-top:15px; font-weight:bold;"></div>
   </div>
 
-  <!-- جدول المنتجات -->
   <div class="card">
     <h2>المنتجات الحالية</h2>
     <table>
-      <thead>
-        <tr>
-          <th>الصورة</th>
-          <th>الاسم</th>
-          <th>السعر</th>
-          <th>إجراءات</th>
-        </tr>
-      </thead>
+      <thead><tr><th>الصورة</th><th>الاسم</th><th>السعر</th><th>إجراءات</th></tr></thead>
       <tbody id="productsTableBody"></tbody>
     </table>
   </div>
 </div>
 
+<!-- ربط ملف لوحة التحكم فقط -->
 <script src="admin.js"></script>
 </body>
 </html>
