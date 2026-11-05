@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>لوحة التحكم | وكالة الطارق</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #7a1e2e; --primary-dark: #5c131f; --dark: #1a1a1a;
+    --light: #f8fafc; --white: #ffffff; --gray: #64748b; --border: #e2e8f0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+  body { background: var(--light); color: var(--dark); }
+  a { text-decoration: none; color: inherit; }
+  
+  .header { background: var(--white); padding: 15px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; }
+  .brand img { height: 50px; }
+  .btn-store { background: var(--primary); color: white; padding: 8px 20px; border-radius: 8px; font-weight: 700; }
+
+  .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+  .card { background: var(--white); border-radius: 12px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 30px; border: 1px solid var(--border); }
+  h2 { font-size: 22px; margin-bottom: 20px; border-bottom: 2px solid var(--primary); display: inline-block; padding-bottom: 5px; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+  @media(max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+  .full { grid-column: span 2; }
+  @media(max-width: 768px) { .full { grid-column: span 1; } }
+
+  label { display: block; margin-bottom: 5px; font-weight: 700; font-size: 14px; }
+  input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; }
+  input:focus, textarea:focus { outline: none; border-color: var(--primary); }
+  textarea { resize: vertical; height: 80px; }
+
+  .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-family: inherit; transition: 0.3s; }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-danger { background: #ef4444; color: white; padding: 6px 12px; font-size: 13px; }
+  .btn-edit { background: #3b82f6; color: white; padding: 6px 12px; font-size: 13px; margin-left: 5px; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+  th, td { padding: 12px; border-bottom: 1px solid var(--border); text-align: right; }
+  th { background: var(--light); font-weight: 800; }
+  .product-img { width: 40px; height: 40px; object-fit: cover; border-radius: 5px; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a href="#" class="brand">
+    <img src="logo.png" alt="شعار">
+    لوحة تحكم الطارق
+  </a>
+  <a href="index.html" class="btn-store">عرض المتجر</a>
+</header>
+
+<div class="container">
+  
+  <!-- نموذج إضافة / تعديل المنتج -->
+  <div class="card">
+    <h2 id="formTitle">إضافة منتج جديد</h2>
+    <form id="productForm">
+      <input type="hidden" id="prodId">
+      <div class="form-grid">
+        <div>
+          <label>اسم المنتج *</label>
+          <input type="text" id="prodName" required placeholder="مثال: رمان بلي تويوتا">
+        </div>
+        <div>
+          <label>التصنيف</label>
+          <select id="prodCategory">
+            <option value="رولمان بلي سيارات">رولمان بلي سيارات</option>
+            <option value="رولمان بلي صناعي">رولمان بلي صناعي</option>
+            <option value="رولمان بلي دراجات">رولمان بلي دراجات</option>
+          </select>
+        </div>
+        <div>
+          <label>السعر *</label>
+          <input type="number" id="prodPrice" required placeholder="150">
+        </div>
+        <div>
+          <label>السعر قبل الخصم (اختياري)</label>
+          <input type="number" id="prodOldPrice" placeholder="180">
+        </div>
+        <div class="full">
+          <label>رابط الصورة (URL) *</label>
+          <input type="url" id="prodImage" required placeholder="https://...">
+        </div>
+        <div class="full">
+          <label>رابط فيديو قصير (يوتيوب أو MP4) - اختياري</label>
+          <input type="url" id="prodVideo" placeholder="https://youtube.com/... أو https://.../video.mp4">
+        </div>
+        <div class="full">
+          <label>الوصف</label>
+          <textarea id="prodDesc" placeholder="وصف تفصيلي للمنتج..."></textarea>
+        </div>
+        <div class="full">
+          <button type="submit" class="btn btn-primary">حفظ المنتج</button>
+          <button type="button" class="btn" style="background:#e2e8f0; color:#333" onclick="resetForm()">إلغاء / تفريغ</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- جدول المنتجات الحالية -->
+  <div class="card">
+    <h2>المنتجات الحالية</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>الصورة</th>
+          <th>الاسم</th>
+          <th>السعر</th>
+          <th>التصنيف</th>
+          <th>إجراءات</th>
+        </tr>
+      </thead>
+      <tbody id="productsTableBody">
+        <!-- سيتم ملؤها بواسطة الجافاسكريبت -->
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>
