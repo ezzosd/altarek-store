@@ -42,13 +42,8 @@
   .product-info { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
   .product-category { font-size: 12px; color: var(--gray); font-weight: 700; margin-bottom: 5px; }
   .product-title { font-size: 16px; font-weight: 800; color: var(--dark); margin-bottom: 15px; flex-grow: 1; }
-  .product-price { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
-  .current-price { font-size: 20px; font-weight: 900; color: var(--primary); }
-  .old-price { font-size: 14px; color: #94a3b8; text-decoration: line-through; }
   .btn-order { width: 100%; background: var(--light); color: var(--dark); border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; }
   .btn-order:hover { background: var(--whatsapp); color: var(--white); border-color: var(--whatsapp); }
-  .btn-video { background: #ef4444; color: white; padding: 10px 15px; border-radius: 8px; font-weight: 800; display: flex; justify-content: center; align-items: center; transition: 0.3s; border: none; cursor: pointer; }
-  .btn-video:hover { background: #dc2626; }
   .contact-section { max-width: 1200px; margin: 0 auto; padding: 0 20px 60px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; }
   .contact-card { background: var(--white); padding: 30px 20px; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0; transition: 0.3s; }
   .contact-card:hover { border-color: var(--primary); box-shadow: 0 10px 25px rgba(122, 30, 46, 0.1); }
@@ -76,7 +71,6 @@
       <nav class="nav-links">
         <a href="index.html">الرئيسية</a>
         <a href="#products">المنتجات</a>
-        <a href="admin.html" style="color:var(--primary);">لوحة التحكم</a>
         <a href="#contact">اتصل بنا</a>
       </nav>
       <div class="header-actions">
@@ -88,8 +82,8 @@
 
   <section class="hero">
     <h1>وكالة الطارق لتجارة رولمان البلي</h1>
-    <p>وجهتك الأولى لأفضل أنواع رولمان البلي (الرمانات) للسيارات، الدراجات، والمعدات الصناعية. جودة أصلية وأسعار تنافسية.</p>
-    <a href="#products" class="btn-primary">تسوق الآن</a>
+    <p>وجهتك الأولى لأفضل أنواع رولمان البلي (الرمانات) للسيارات، الدراجات، والمعدات الصناعية. جودة أصلية.</p>
+    <a href="#products" class="btn-primary">تصفح المنتجات</a>
   </section>
 
   <h2 class="section-title">تصفح الأقسام</h2>
@@ -121,21 +115,16 @@
 
   <a href="https://wa.me/201110666981" class="whatsapp-float" target="_blank">💬</a>
 
-  <!-- ============================================= -->
-  <!-- تحميل المنتجات من products.json مع بدائل وحماية -->
-  <!-- ============================================= -->
   <script>
-    // منتجات احتياطية تظهر فقط إذا فشل تحميل products.json
     const fallbackProducts = [
-      { id: 1, name: "رولمان بلي أمامي تويوتا كورولا", category: "سيارات", price: 350, oldPrice: 450, badge: "خصم", image: "" },
-      { id: 2, name: "رولمان بلي خلفي هوندا سيفيك", category: "سيارات", price: 280, oldPrice: 320, badge: "", image: "" },
-      { id: 3, name: "رولمان بلي صناعي SKF 6205", category: "صناعي", price: 120, oldPrice: 150, badge: "جديد", image: "" },
-      { id: 4, name: "رولمان بلي صناعي NSK 6304", category: "صناعي", price: 95, oldPrice: 0, badge: "", image: "" },
-      { id: 5, name: "رولمان بلي دراجة هوائية مقاس 6000", category: "دراجات", price: 45, oldPrice: 60, badge: "خصم", image: "" },
-      { id: 6, name: "رولمان بلي موتوسيكل هوندا", category: "دراجات", price: 75, oldPrice: 0, badge: "", image: "" }
+      { id: 1, name: "رولمان بلي أمامي تويوتا كورولا", category: "سيارات", badge: "متوفر", image: "" },
+      { id: 2, name: "رولمان بلي خلفي هوندا سيفيك", category: "سيارات", badge: "", image: "" },
+      { id: 3, name: "رولمان بلي صناعي SKF 6205", category: "صناعي", badge: "جديد", image: "" },
+      { id: 4, name: "رولمان بلي صناعي NSK 6304", category: "صناعي", badge: "", image: "" },
+      { id: 5, name: "رولمان بلي دراجة هوائية مقاس 6000", category: "دراجات", badge: "", image: "" },
+      { id: 6, name: "رولمان بلي موتوسيكل هوندا", category: "دراجات", badge: "", image: "" }
     ];
 
-    // دالة عرض المنتجات
     function renderProducts(list) {
       const grid = document.getElementById('storeProducts');
       if (!grid) return;
@@ -148,7 +137,7 @@
       grid.innerHTML = list.map(p => {
         const safeName = String(p.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const imageHtml = p.image
-          ? `<img src="${p.image}" alt="${safeName}" onerror="this.style.display='none';this.parentNode.innerHTML='<div style=\\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:60px;background:#f1f5f9;\\'>⚙️</div>';" />`
+          ? `<img src="${p.image}" alt="${safeName}" onerror="this.style.display='none';" />`
           : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:60px;background:#f1f5f9;">⚙️</div>`;
 
         return `
@@ -160,10 +149,6 @@
             <div class="product-info">
               <div class="product-category">${p.category || ''}</div>
               <h3 class="product-title">${p.name || ''}</h3>
-              <div class="product-price">
-                <span class="current-price">${p.price ?? 0} ج.م</span>
-                ${p.oldPrice ? `<span class="old-price">${p.oldPrice} ج.م</span>` : ''}
-              </div>
               <button class="btn-order" onclick="orderProduct('${safeName}')">🛒 اطلب عبر واتساب</button>
             </div>
           </div>
@@ -171,45 +156,54 @@
       }).join('');
     }
 
-    // دالة الطلب عبر واتساب
     function orderProduct(name) {
-      const msg = encodeURIComponent(`مرحباً، أريد طلب المنتج: ${name}`);
+      const msg = encodeURIComponent(`مرحباً، أريد الاستفسار عن المنتج: ${name}`);
       window.open(`https://wa.me/201110666981?text=${msg}`, '_blank');
     }
 
-    // تحميل المنتجات من products.json
     async function loadProducts() {
       let list = null;
-
       try {
-        // كسر التخزين المؤقت دائمًا لضمان أحدث نسخة
         const res = await fetch('products.json?v=' + Date.now(), { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
-          // دعم صيغتين: مصفوفة مباشرة أو كائن يحتوي على products
-          if (Array.isArray(data)) {
-            list = data;
-          } else if (data && Array.isArray(data.products)) {
-            list = data.products;
-          }
+          if (Array.isArray(data)) list = data;
+          else if (data && Array.isArray(data.products)) list = data.products;
         } else {
-          console.warn('⚠️ لم يتم العثور على products.json (HTTP ' + res.status + '). سيتم استخدام المنتجات الافتراضية.');
+          console.warn('⚠️ لم يتم العثور على products.json (HTTP ' + res.status + ')');
         }
       } catch (err) {
         console.warn('⚠️ تعذر تحميل products.json:', err);
       }
 
-      // إذا فشل التحميل أو كان الملف فارغًا → استخدم الافتراضي
-      if (!Array.isArray(list) || list.length === 0) {
-        console.info('ℹ️ يتم عرض المنتجات الافتراضية.');
-        list = fallbackProducts;
-      }
-
+      if (!Array.isArray(list) || list.length === 0) list = fallbackProducts;
       renderProducts(list);
     }
 
-    // تشغيل عند اكتمال تحميل الصفحة
     document.addEventListener('DOMContentLoaded', loadProducts);
+
+    // ====== الدخول المخفي ======
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+        window.location.href = 'admin.html';
+      }
+    });
+
+    let _adminClicks = 0, _adminTimer = null;
+    const _copyEl = document.querySelector('.footer p');
+    if (_copyEl) {
+      _copyEl.style.cursor = 'default';
+      _copyEl.style.userSelect = 'none';
+      _copyEl.addEventListener('click', () => {
+        _adminClicks++;
+        clearTimeout(_adminTimer);
+        _adminTimer = setTimeout(() => { _adminClicks = 0; }, 3000);
+        if (_adminClicks >= 5) {
+          _adminClicks = 0;
+          window.location.href = 'admin.html';
+        }
+      });
+    }
   </script>
 </body>
 </html>
