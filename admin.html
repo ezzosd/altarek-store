@@ -6,10 +6,7 @@
 <title>لوحة التحكم | وكالة الطارق</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --primary: #7a1e2e; --primary-dark: #5c131f; --dark: #1a1a1a;
-    --light: #f8fafc; --white: #ffffff; --gray: #64748b; --border: #e2e8f0;
-  }
+  :root { --primary: #7a1e2e; --primary-dark: #5c131f; --dark: #1a1a1a; --light: #f8fafc; --white: #ffffff; --gray: #64748b; --border: #e2e8f0; }
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
   body { background: var(--light); color: var(--dark); }
   a { text-decoration: none; color: inherit; }
@@ -24,9 +21,8 @@
   h2 { font-size: 22px; margin-bottom: 20px; border-bottom: 2px solid var(--primary); display: inline-block; padding-bottom: 5px; }
 
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-  @media(max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+  @media(max-width: 768px) { .form-grid { grid-template-columns: 1fr; } .full { grid-column: span 1 !important; } }
   .full { grid-column: span 2; }
-  @media(max-width: 768px) { .full { grid-column: span 1; } }
 
   label { display: block; margin-bottom: 5px; font-weight: 700; font-size: 14px; }
   input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; }
@@ -37,7 +33,7 @@
   .btn-primary { background: var(--primary); color: white; }
   .btn-primary:hover { background: var(--primary-dark); }
   .btn-danger { background: #ef4444; color: white; padding: 6px 12px; font-size: 13px; }
-  .btn-edit { background: #3b82f6; color: white; padding: 6px 12px; font-size: 13px; margin-left: 5px; }
+  .btn-edit { background: #3b82f6; color: white; padding: 6px 12px; font-size: 13px; }
 
   table { width: 100%; border-collapse: collapse; margin-top: 15px; }
   th, td { padding: 12px; border-bottom: 1px solid var(--border); text-align: right; }
@@ -48,7 +44,7 @@
 <body>
 
 <header class="header">
-  <a href="#" class="brand">
+  <a href="index.html" class="brand">
     <img src="logo.png" alt="شعار">
     لوحة تحكم الطارق
   </a>
@@ -56,8 +52,6 @@
 </header>
 
 <div class="container">
-  
-  <!-- نموذج إضافة / تعديل المنتج -->
   <div class="card">
     <h2 id="formTitle">إضافة منتج جديد</h2>
     <form id="productForm">
@@ -85,7 +79,7 @@
         </div>
         <div class="full">
           <label>رابط الصورة (URL) *</label>
-          <input type="url" id="prodImage" required placeholder="https://...">
+          <input type="url" id="prodImage" required placeholder="https://... (أو اتركه فارغاً لوضع صورة مؤقتة)">
         </div>
         <div class="full">
           <label>رابط فيديو قصير (يوتيوب أو MP4) - اختياري</label>
@@ -103,7 +97,6 @@
     </form>
   </div>
 
-  <!-- جدول المنتجات الحالية -->
   <div class="card">
     <h2>المنتجات الحالية</h2>
     <table>
@@ -112,16 +105,12 @@
           <th>الصورة</th>
           <th>الاسم</th>
           <th>السعر</th>
-          <th>التصنيف</th>
           <th>إجراءات</th>
         </tr>
       </thead>
-      <tbody id="productsTableBody">
-        <!-- سيتم ملؤها بواسطة الجافاسكريبت -->
-      </tbody>
+      <tbody id="productsTableBody"></tbody>
     </table>
   </div>
-
 </div>
 
 <script src="admin.js"></script>
