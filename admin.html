@@ -39,6 +39,8 @@
   th, td { padding: 12px; border-bottom: 1px solid var(--border); text-align: right; }
   th { background: var(--light); font-weight: 800; }
   .product-img { width: 40px; height: 40px; object-fit: cover; border-radius: 5px; }
+  
+  .hidden-section { display: none; padding: 20px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; margin-bottom: 20px; }
 </style>
 </head>
 <body>
@@ -52,6 +54,31 @@
 </header>
 
 <div class="container">
+  
+  <!-- إعدادات GitHub -->
+  <div class="card">
+    <h2>إعدادات الاتصال (لحفظ المنتجات)</h2>
+    <p style="font-size:14px; color:var(--gray); margin-bottom:15px;">
+      لحفظ المنتجات في موقعك، تحتاج إلى وضع "توكن" GitHub هنا. (يمكنك الحصول عليه من إعدادات حسابك في GitHub - Developer Settings - Personal Access Tokens).
+    </p>
+    <div class="form-grid">
+      <div class="full">
+        <label>GitHub Personal Access Token (يبدأ بـ ghp_...)</label>
+        <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" onchange="saveToken()">
+      </div>
+      <div>
+        <label>اسم المستخدم (Owner)</label>
+        <input type="text" id="githubOwner" placeholder="ezzosd" onchange="saveToken()">
+      </div>
+      <div>
+        <label>اسم المستودع (Repo)</label>
+        <input type="text" id="githubRepo" placeholder="altarek-agency" onchange="saveToken()">
+      </div>
+    </div>
+    <div id="tokenStatus" style="margin-top:10px; font-size:14px; font-weight:bold;"></div>
+  </div>
+
+  <!-- نموذج إضافة المنتج -->
   <div class="card">
     <h2 id="formTitle">إضافة منتج جديد</h2>
     <form id="productForm">
@@ -77,26 +104,36 @@
           <label>السعر قبل الخصم (اختياري)</label>
           <input type="number" id="prodOldPrice" placeholder="180">
         </div>
+        
+        <!-- رفع صورة من الجهاز -->
         <div class="full">
-          <label>رابط الصورة (URL) *</label>
-          <input type="url" id="prodImage" required placeholder="https://... (أو اتركه فارغاً لوضع صورة مؤقتة)">
+          <label>صورة المنتج *</label>
+          <div style="display:flex; gap:10px;">
+            <input type="file" id="prodImageFile" accept="image/*" style="flex:1;">
+            <span style="align-self:center; color:var(--gray);">أو</span>
+            <input type="url" id="prodImageUrl" placeholder="رابط صورة (https://...)" style="flex:1;">
+          </div>
+          <div id="imagePreview" style="margin-top:10px;"></div>
         </div>
+
         <div class="full">
           <label>رابط فيديو قصير (يوتيوب أو MP4) - اختياري</label>
-          <input type="url" id="prodVideo" placeholder="https://youtube.com/... أو https://.../video.mp4">
+          <input type="url" id="prodVideo" placeholder="https://youtube.com/...">
         </div>
         <div class="full">
           <label>الوصف</label>
           <textarea id="prodDesc" placeholder="وصف تفصيلي للمنتج..."></textarea>
         </div>
         <div class="full">
-          <button type="submit" class="btn btn-primary">حفظ المنتج</button>
+          <button type="submit" class="btn btn-primary" id="saveBtn">حفظ المنتج في الموقع</button>
           <button type="button" class="btn" style="background:#e2e8f0; color:#333" onclick="resetForm()">إلغاء / تفريغ</button>
         </div>
       </div>
     </form>
+    <div id="formMsg" style="margin-top:15px; font-weight:bold;"></div>
   </div>
 
+  <!-- جدول المنتجات -->
   <div class="card">
     <h2>المنتجات الحالية</h2>
     <table>
