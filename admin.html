@@ -7,7 +7,7 @@
 <title>لوحة التحكم | وكالة الطارق</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root { --primary: #8B1E3F; --primary-dark: #5C0E28; --dark: #0F172A; --light: #FAF8F5; --white: #ffffff; --gray: #64748B; --green: #25D366; --red: #DC2626; --border: #EAE5DD; }
+  :root { --primary: #8B1E3F; --primary-dark: #5C0E28; --dark: #0F172A; --light: #FAF8F5; --white: #fff; --gray: #64748B; --green: #25D366; --red: #DC2626; --border: #EAE5DD; }
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
   body { background: var(--light); color: var(--dark); min-height: 100vh; line-height: 1.7; }
   .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
@@ -27,6 +27,8 @@
   .btn-danger { background: var(--red); color: white; }
   .btn-secondary { background: var(--light); color: var(--dark); border: 1px solid var(--border); }
   .btn-secondary:hover { background: #EAE5DD; }
+  .btn-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .btn-group button { margin-top: 0; flex: 1; min-width: 150px; }
   #loginScreen { max-width: 420px; margin: 80px auto; }
   .hidden { display: none !important; }
   .status { padding: 10px 14px; border-radius: 10px; margin-top: 10px; font-weight: 700; font-size: 14px; }
@@ -48,7 +50,7 @@
 
 <div id="loginScreen" class="card">
   <h1>🔒 لوحة التحكم</h1>
-  <p class="hint">أدخل بيانات GitHub للدخول. التوكن يُحفظ في الجلسة فقط ويُمسح عند إغلاق المتصفح.</p>
+  <p class="hint">أدخل بيانات GitHub للدخول. التوكن يُحفظ في الجلسة فقط.</p>
   <form id="loginForm">
     <div class="row">
       <div class="form-group"><label>Owner</label><input id="githubOwner" placeholder="ezzosd" required></div>
@@ -68,16 +70,37 @@
       <button class="btn-secondary" id="logoutBtn">🚪 خروج</button>
     </div>
 
+    <!-- Export / Import -->
+    <div class="card">
+      <h2>📥 تصدير المنتجات (دفعة واحدة)</h2>
+      <p class="hint">حمّل كل المنتجات كملف. اختر "بدون أسعار" لو هتبعت الملف لحد تاني.</p>
+      <div class="btn-group">
+        <button class="btn-primary" onclick="exportJSON(true)">📥 JSON (بدون أسعار)</button>
+        <button class="btn-secondary" onclick="exportJSON(false)">📥 JSON (كامل)</button>
+        <button class="btn-secondary" onclick="exportCSV()">📥 CSV (Excel)</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📤 استيراد منتجات (دفعة واحدة)</h2>
+      <p class="hint">ارفع ملف JSON لإضافة أو تحديث منتجات متعددة.</p>
+      <input type="file" id="importFile" accept=".json,application/json">
+      <div class="btn-group">
+        <button class="btn-primary" onclick="importJSON('merge')">➕ استيراد (دمج)</button>
+        <button class="btn-secondary" onclick="importJSON('replace')">🔄 استيراد (استبدال)</button>
+      </div>
+      <div id="importMsg"></div>
+    </div>
+
+    <!-- Add/Edit Product -->
     <div class="card">
       <h2 id="formTitle">➕ إضافة منتج جديد</h2>
       <form id="productForm">
         <input type="hidden" id="prodId">
-
         <div class="form-group">
           <label>اسم المنتج *</label>
           <input id="prodName" required placeholder="رولمان بلي أمامي تويوتا">
         </div>
-
         <div class="row">
           <div class="form-group">
             <label>النوع</label>
@@ -93,28 +116,12 @@
             <input id="prodBadge" placeholder="جديد / خصم">
           </div>
         </div>
-
         <div class="row">
-          <div class="form-group">
-            <label>السعر (ج.م) *</label>
-            <input id="prodPrice" type="number" min="0" step="0.01" required placeholder="200">
-          </div>
-          <div class="form-group">
-            <label>السعر قبل الخصم (اختياري)</label>
-            <input id="prodOldPrice" type="number" min="0" step="0.01" placeholder="250">
-          </div>
+          <div class="form-group"><label>السعر (اختياري - لا يظهر للزوار)</label><input id="prodPrice" type="number" min="0" step="0.01" placeholder="200"></div>
+          <div class="form-group"><label>السعر قبل الخصم (اختياري)</label><input id="prodOldPrice" type="number" min="0" step="0.01" placeholder="250"></div>
         </div>
-
-        <div class="form-group">
-          <label>رابط الفيديو (اختياري)</label>
-          <input id="prodVideo" type="url" placeholder="https://youtube.com/...">
-        </div>
-
-        <div class="form-group">
-          <label>الوصف (اختياري)</label>
-          <textarea id="prodDesc" placeholder="وصف تفصيلي للمنتج"></textarea>
-        </div>
-
+        <div class="form-group"><label>رابط الفيديو (اختياري)</label><input id="prodVideo" type="url" placeholder="https://youtube.com/..."></div>
+        <div class="form-group"><label>الوصف (اختياري)</label><textarea id="prodDesc" placeholder="وصف تفصيلي"></textarea></div>
         <div class="row">
           <div class="form-group">
             <label>رفع صورة (اختياري)</label>
@@ -126,14 +133,11 @@
             <input id="prodImageUrl" type="url" placeholder="https://...">
           </div>
         </div>
-
         <div id="imagePreview" class="image-preview"></div>
-
         <label class="checkbox-label">
           <input type="checkbox" id="prodStock" checked>
           <span>متوفر في المخزون</span>
         </label>
-
         <div style="margin-top:15px;">
           <button type="submit" class="btn-primary" id="saveBtn">💾 إضافة المنتج</button>
           <button type="button" class="btn-secondary" id="resetBtn">إلغاء</button>
@@ -142,6 +146,7 @@
       </form>
     </div>
 
+    <!-- Products Table -->
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
         <h2>📋 المنتجات (<span id="productCount">0</span>)</h2>
@@ -150,13 +155,7 @@
       <div style="overflow-x:auto;">
         <table>
           <thead>
-            <tr>
-              <th>الصورة</th>
-              <th>الاسم</th>
-              <th>السعر</th>
-              <th>النوع</th>
-              <th>إجراءات</th>
-            </tr>
+            <tr><th>الصورة</th><th>الاسم</th><th>النوع</th><th>السعر</th><th>إجراءات</th></tr>
           </thead>
           <tbody id="productsTableBody"></tbody>
         </table>
