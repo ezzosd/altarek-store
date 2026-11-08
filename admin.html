@@ -4,516 +4,170 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>لوحة التحكم</title>
+<title>لوحة التحكم | وكالة الطارق</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root { --primary: #7a1e2e; --primary-dark: #5c131f; --dark: #1a1a1a; --light: #f8fafc; --white: #ffffff; --gray: #64748b; --green: #25d366; --red: #dc2626; --blue: #2563eb; }
+  :root { --primary: #7a1e2e; --primary-dark: #5c131f; --dark: #1a1a1a; --light: #f8fafc; --white: #ffffff; --gray: #64748b; --green: #25d366; --red: #dc2626; }
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
-  body { background: var(--light); color: var(--dark); }
-  .container { max-width: 950px; margin: 0 auto; padding: 20px; }
+  body { background: var(--light); color: var(--dark); min-height: 100vh; }
+  .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
   h1 { color: var(--primary); margin-bottom: 20px; font-size: 24px; }
   .card { background: var(--white); border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
   .card h2 { font-size: 18px; margin-bottom: 15px; color: var(--primary); }
   .form-group { margin-bottom: 12px; }
   label { display: block; font-weight: 700; margin-bottom: 5px; font-size: 14px; }
   input, select, textarea { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; font-size: 15px; }
-  textarea { resize: vertical; min-height: 150px; line-height: 1.6; font-family: 'Courier New', monospace; }
+  textarea { resize: vertical; min-height: 80px; }
   input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   button { padding: 10px 20px; border: none; border-radius: 8px; font-family: inherit; font-weight: 800; cursor: pointer; font-size: 15px; transition: 0.2s; margin-top: 8px; }
+  button:disabled { opacity: 0.6; cursor: not-allowed; }
   .btn-primary { background: var(--primary); color: white; }
-  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
   .btn-danger { background: var(--red); color: white; }
-  .btn-success { background: var(--green); color: white; }
   .btn-secondary { background: var(--light); color: var(--dark); border: 1px solid #e2e8f0; }
-  .btn-blue { background: var(--blue); color: white; }
-  .product-item { background: var(--light); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .product-item .info { flex: 1; min-width: 200px; }
-  .product-item .name { font-weight: 800; margin-bottom: 3px; }
-  .product-item .meta { font-size: 13px; color: var(--gray); }
-  .actions { display: flex; gap: 8px; }
-  .actions button { padding: 6px 12px; font-size: 13px; margin-top: 0; }
-  #loginScreen { max-width: 400px; margin: 100px auto; }
+  .btn-secondary:hover { background: #e2e8f0; }
+  #loginScreen { max-width: 420px; margin: 80px auto; }
   .hidden { display: none !important; }
   .status { padding: 10px; border-radius: 8px; margin-top: 10px; font-weight: 700; font-size: 14px; }
   .status.success { background: #dcfce7; color: #166534; }
   .status.error { background: #fee2e2; color: #991b1b; }
   .status.info { background: #dbeafe; color: #1e40af; }
-  .tabs { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; }
-  .tab { padding: 10px 20px; cursor: pointer; font-weight: 800; color: var(--gray); border-bottom: 3px solid transparent; margin-bottom: -2px; font-size: 14px; }
-  .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-  .hint { font-size: 12px; color: var(--gray); margin-bottom: 10px; line-height: 1.6; }
-  .preview-count { background: #fef3c7; color: #92400e; padding: 8px 12px; border-radius: 8px; font-weight: 700; font-size: 14px; margin-top: 10px; display: inline-block; }
+  .hint { font-size: 13px; color: var(--gray); margin-bottom: 15px; line-height: 1.6; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 10px; text-align: right; border-bottom: 1px solid #e2e8f0; font-size: 14px; vertical-align: middle; }
+  th { background: var(--light); font-weight: 800; color: var(--primary); }
+  .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+  .image-preview { margin-top: 10px; }
+  .checkbox-label { display: flex; align-items: center; gap: 8px; font-weight: 700; margin-top: 10px; }
+  .checkbox-label input { width: auto; }
+  @media (max-width: 600px) { .row { grid-template-columns: 1fr; } th, td { font-size: 12px; padding: 6px; } }
 </style>
 </head>
 <body>
 
-<!-- شاشة تسجيل الدخول -->
+<!-- Login -->
 <div id="loginScreen" class="card">
   <h1>🔒 لوحة التحكم</h1>
-  <p style="color:var(--gray);margin-bottom:15px;">أدخل كلمة المرور للدخول</p>
-  <div class="form-group">
-    <input type="password" id="passwordInput" placeholder="كلمة المرور" onkeypress="if(event.key==='Enter')login()">
-  </div>
-  <button class="btn-primary" style="width:100%;" onclick="login()">دخول</button>
-  <div id="loginStatus"></div>
+  <p class="hint">أدخل بيانات GitHub للدخول. التوكن يُحفظ في الجلسة فقط ويُمسح عند إغلاق المتصفح.</p>
+  <form id="loginForm">
+    <div class="row">
+      <div class="form-group"><label>Owner</label><input id="githubOwner" placeholder="ezzosd" required></div>
+      <div class="form-group"><label>Repo</label><input id="githubRepo" placeholder="altarek-store" required></div>
+    </div>
+    <div class="form-group"><label>Branch</label><input id="githubBranch" placeholder="main" value="main"></div>
+    <div class="form-group"><label>Personal Access Token</label><input id="githubToken" type="password" placeholder="ghp_..." required></div>
+    <button type="submit" class="btn-primary" style="width:100%;">🔓 دخول</button>
+  </form>
+  <div id="loginMsg"></div>
 </div>
 
-<!-- لوحة التحكم -->
+<!-- Admin Panel -->
 <div id="adminPanel" class="hidden">
   <div class="container">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div class="header-bar">
       <h1>⚙️ لوحة تحكم وكالة الطارق</h1>
-      <button class="btn-secondary" onclick="logout()">خروج</button>
+      <button class="btn-secondary" id="logoutBtn">🚪 خروج</button>
     </div>
 
-    <!-- إعدادات GitHub -->
     <div class="card">
-      <h2>🔑 إعدادات GitHub (مرة واحدة فقط)</h2>
-      <p class="hint">تُحفظ في متصفحك فقط. تحتاج PAT بصلاحية "Contents: Read and write".</p>
-      <div class="row">
-        <div class="form-group"><label>اسم المستخدم (Owner)</label><input id="ownerInput" placeholder="username"></div>
-        <div class="form-group"><label>اسم المستودع (Repo)</label><input id="repoInput" placeholder="repo-name"></div>
-      </div>
-      <div class="row">
-        <div class="form-group"><label>الفرع (Branch)</label><input id="branchInput" placeholder="main" value="main"></div>
-        <div class="form-group"><label>مسار الملف</label><input id="pathInput" placeholder="products.json" value="products.json"></div>
-      </div>
-      <div class="form-group"><label>رمز الوصول (PAT)</label><input id="tokenInput" type="password" placeholder="ghp_... أو github_pat_..."></div>
-      <button class="btn-primary" onclick="saveSettings()">💾 حفظ الإعدادات</button>
-      <button class="btn-secondary" onclick="loadFromGitHub()">📥 تحميل المنتجات من GitHub</button>
-      <div id="settingsStatus"></div>
-    </div>
+      <h2 id="formTitle">➕ إضافة منتج جديد</h2>
+      <form id="productForm">
+        <input type="hidden" id="prodId">
 
-    <!-- إضافة منتج واحد -->
-    <div class="card">
-      <h2>➕ إضافة / تعديل منتج واحد</h2>
-      <input type="hidden" id="editId">
-      <div class="form-group"><label>اسم المنتج *</label><input id="nameInput" placeholder="مثال: رولمان بلي أمامي تويوتا"></div>
-      <div class="row">
-        <div class="form-group"><label>القسم</label>
-          <select id="categoryInput">
-            <option value="سيارات">سيارات</option>
-            <option value="صناعي">صناعي</option>
-            <option value="دراجات">دراجات</option>
-            <option value="أخرى">أخرى</option>
-          </select>
+        <div class="form-group">
+          <label>اسم المنتج *</label>
+          <input id="prodName" required placeholder="رولمان بلي أمامي تويوتا">
         </div>
-        <div class="form-group"><label>شارة (اختياري)</label><input id="badgeInput" placeholder="جديد / متوفر"></div>
-      </div>
-      <div class="form-group"><label>رابط الصورة (اختياري)</label><input id="imageInput" placeholder="https://... أو اسم ملف مثل image.jpg"></div>
-      <button class="btn-success" onclick="saveProduct()">💾 حفظ المنتج</button>
-      <button class="btn-secondary" onclick="resetForm()">إلغاء</button>
-      <div id="formStatus"></div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>القسم</label>
+            <select id="prodCategory">
+              <option value="سيارات">سيارات</option>
+              <option value="صناعي">صناعي</option>
+              <option value="دراجات">دراجات</option>
+              <option value="أخرى">أخرى</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>شارة (اختياري)</label>
+            <input id="prodBadge" placeholder="جديد / خصم">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>السعر (ج.م) *</label>
+            <input id="prodPrice" type="number" min="0" step="0.01" required placeholder="200">
+          </div>
+          <div class="form-group">
+            <label>السعر قبل الخصم (اختياري)</label>
+            <input id="prodOldPrice" type="number" min="0" step="0.01" placeholder="250">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>رابط الفيديو (اختياري)</label>
+          <input id="prodVideo" type="url" placeholder="https://youtube.com/...">
+        </div>
+
+        <div class="form-group">
+          <label>الوصف (اختياري)</label>
+          <textarea id="prodDesc" placeholder="وصف تفصيلي للمنتج"></textarea>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>رفع صورة (اختياري)</label>
+            <input id="prodImageFile" type="file" accept="image/*">
+            <small class="hint" style="margin-top:4px;">الحد الأقصى 750KB</small>
+          </div>
+          <div class="form-group">
+            <label>أو رابط صورة</label>
+            <input id="prodImageUrl" type="url" placeholder="https://...">
+          </div>
+        </div>
+
+        <div id="imagePreview" class="image-preview"></div>
+
+        <label class="checkbox-label">
+          <input type="checkbox" id="prodStock" checked>
+          <span>متوفر في المخزون</span>
+        </label>
+
+        <div style="margin-top:15px;">
+          <button type="submit" class="btn-primary" id="saveBtn">💾 إضافة المنتج</button>
+          <button type="button" class="btn-secondary" id="resetBtn">إلغاء</button>
+        </div>
+        <div id="formMsg"></div>
+      </form>
     </div>
 
-    <!-- إضافة مجموعة منتجات دفعة واحدة -->
     <div class="card">
-      <h2>📦 إضافة مجموعة منتجات دفعة واحدة</h2>
-      <p class="hint">اختر طريقة الإضافة ثم اضغط الزر. المنتجات تُضاف للقائمة المحلية، ثم اضغط "حفظ التغييرات على GitHub" في الأسفل لرفعها للموقع.</p>
-
-      <div class="tabs">
-        <div class="tab active" onclick="switchTab('tab-lines', this)">📝 نص بسيط</div>
-        <div class="tab" onclick="switchTab('tab-json', this)">{ } JSON</div>
-        <div class="tab" onclick="switchTab('tab-file', this)">📁 رفع ملف</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+        <h2>📋 المنتجات (<span id="productCount">0</span>)</h2>
+        <button class="btn-secondary" id="reloadBtn">🔄 تحديث</button>
       </div>
-
-      <!-- تبويب النص البسيط -->
-      <div id="tab-lines" class="tab-content active">
-        <p class="hint">كل سطر = منتج واحد. الفاصل بين الحقول هو <code>|</code>. الحقول الاختيارية يمكن تركها فارغة.<br>
-        الترتيب: <strong>الاسم | القسم | الشارة | رابط الصورة</strong></p>
-        <textarea id="bulkLinesInput" placeholder="رولمان بلي أمامي تويوتا | سيارات | جديد | 
-رولمان بلي خلفي هوندا | سيارات | | 
-رولمان بلي صناعي SKF | صناعي | متوفر | https://example.com/img.jpg"></textarea>
-        <button class="btn-blue" onclick="bulkAddLines()">➕ إضافة المنتجات من النص</button>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>الصورة</th>
+              <th>الاسم</th>
+              <th>السعر</th>
+              <th>القسم</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="productsTableBody"></tbody>
+        </table>
       </div>
-
-      <!-- تبويب JSON -->
-      <div id="tab-json" class="tab-content">
-        <p class="hint">الصق مصفوفة JSON كاملة. كل منتج: <code>{ name, category, badge, image }</code></p>
-        <textarea id="bulkJsonInput" placeholder='[
-  { "name": "رولمان بلي أمامي تويوتا", "category": "سيارات", "badge": "جديد", "image": "" },
-  { "name": "رولمان بلي صناعي SKF", "category": "صناعي", "badge": "", "image": "" }
-]'></textarea>
-        <button class="btn-blue" onclick="bulkAddJson()">➕ إضافة المنتجات من JSON</button>
-      </div>
-
-      <!-- تبويب رفع ملف -->
-      <div id="tab-file" class="tab-content">
-        <p class="hint">ارفع ملف <code>.json</code> يحتوي على مصفوفة منتجات.</p>
-        <input type="file" id="bulkFileInput" accept=".json,application/json">
-        <button class="btn-blue" onclick="bulkAddFile()">➕ إضافة المنتجات من الملف</button>
-      </div>
-
-      <div id="bulkStatus"></div>
-    </div>
-
-    <!-- قائمة المنتجات -->
-    <div class="card">
-      <h2>📋 المنتجات الحالية (<span id="countSpan">0</span>)</h2>
-      <div id="productsList"></div>
-    </div>
-
-    <!-- حفظ على GitHub -->
-    <div class="card">
-      <h2>💾 رفع التغييرات إلى GitHub</h2>
-      <p class="hint">بعد الإضافة/التعديل/الحذف، اضغط الزر لرفع التغييرات للموقع دفعة واحدة.</p>
-      <button class="btn-primary" onclick="saveToGitHub()">🚀 حفظ التغييرات على GitHub</button>
-      <div id="saveStatus"></div>
+      <div id="saveMsg"></div>
     </div>
   </div>
 </div>
 
-<script>
-  // ====== كلمة المرور (غيّرها من هنا) ======
-  const ADMIN_PASSWORD = 'Tarek@2024';
-
-  let products = [];
-  let currentFileSha = null;
-
-  // ====== تسجيل الدخول ======
-  function login() {
-    const input = document.getElementById('passwordInput').value;
-    const status = document.getElementById('loginStatus');
-    if (input === ADMIN_PASSWORD) {
-      sessionStorage.setItem('adminLoggedIn', '1');
-      showAdmin();
-    } else {
-      status.innerHTML = '<div class="status error">❌ كلمة المرور غير صحيحة</div>';
-    }
-  }
-  function logout() {
-    sessionStorage.removeItem('adminLoggedIn');
-    location.reload();
-  }
-  function showAdmin() {
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('adminPanel').classList.remove('hidden');
-    loadSettings();
-    loadFromGitHub();
-  }
-
-  // ====== التبويبات ======
-  function switchTab(id, el) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    el.classList.add('active');
-  }
-
-  // ====== الإعدادات ======
-  function saveSettings() {
-    const cfg = {
-      owner: document.getElementById('ownerInput').value.trim(),
-      repo: document.getElementById('repoInput').value.trim(),
-      branch: document.getElementById('branchInput').value.trim() || 'main',
-      path: document.getElementById('pathInput').value.trim() || 'products.json',
-      token: document.getElementById('tokenInput').value.trim()
-    };
-    if (!cfg.owner || !cfg.repo || !cfg.token) {
-      showStatus('settingsStatus', 'error', '❌ املأ الحقول المطلوبة');
-      return;
-    }
-    localStorage.setItem('ghConfig', JSON.stringify(cfg));
-    showStatus('settingsStatus', 'success', '✅ تم حفظ الإعدادات');
-  }
-  function loadSettings() {
-    const cfg = JSON.parse(localStorage.getItem('ghConfig') || '{}');
-    if (cfg.owner) document.getElementById('ownerInput').value = cfg.owner;
-    if (cfg.repo) document.getElementById('repoInput').value = cfg.repo;
-    if (cfg.branch) document.getElementById('branchInput').value = cfg.branch;
-    if (cfg.path) document.getElementById('pathInput').value = cfg.path;
-    if (cfg.token) document.getElementById('tokenInput').value = cfg.token;
-  }
-  function getConfig() {
-    return JSON.parse(localStorage.getItem('ghConfig') || '{}');
-  }
-
-  // ====== ترميز UTF-8 ======
-  function utf8ToBase64(str) { return btoa(unescape(encodeURIComponent(str))); }
-  function base64ToUtf8(str) { return decodeURIComponent(escape(atob(str))); }
-
-  // ====== تحميل من GitHub ======
-  async function loadFromGitHub() {
-    const cfg = getConfig();
-    if (!cfg.owner || !cfg.repo || !cfg.token) {
-      showStatus('settingsStatus', 'error', '❌ اضبط إعدادات GitHub أولاً');
-      return;
-    }
-    showStatus('settingsStatus', 'info', '⏳ جاري التحميل...');
-    try {
-      const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}?ref=${cfg.branch}`;
-      const res = await fetch(url, {
-        headers: { 'Authorization': `token ${cfg.token}`, 'Accept': 'application/vnd.github.v3+json' }
-      });
-      if (res.status === 404) {
-        products = [];
-        currentFileSha = null;
-        renderProducts();
-        showStatus('settingsStatus', 'info', 'ℹ️ الملف غير موجود. سيُنشأ عند الحفظ.');
-        return;
-      }
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || 'HTTP ' + res.status);
-      }
-      const data = await res.json();
-      currentFileSha = data.sha;
-      const content = base64ToUtf8(data.content.replace(/\n/g, ''));
-      const parsed = JSON.parse(content);
-      products = Array.isArray(parsed) ? parsed : (parsed.products || []);
-      renderProducts();
-      showStatus('settingsStatus', 'success', `✅ تم تحميل ${products.length} منتج`);
-    } catch (e) {
-      showStatus('settingsStatus', 'error', '❌ فشل التحميل: ' + e.message);
-    }
-  }
-
-  // ====== حفظ على GitHub ======
-  async function saveToGitHub() {
-    const cfg = getConfig();
-    if (!cfg.owner || !cfg.repo || !cfg.token) {
-      showStatus('saveStatus', 'error', '❌ اضبط إعدادات GitHub أولاً');
-      return;
-    }
-    showStatus('saveStatus', 'info', '⏳ جاري الحفظ...');
-    try {
-      const getUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}?ref=${cfg.branch}`;
-      const getRes = await fetch(getUrl, {
-        headers: { 'Authorization': `token ${cfg.token}`, 'Accept': 'application/vnd.github.v3+json' }
-      });
-      let sha = null;
-      if (getRes.ok) {
-        const getData = await getRes.json();
-        sha = getData.sha;
-      } else if (getRes.status !== 404) {
-        const err = await getRes.json();
-        throw new Error(err.message || 'GET failed');
-      }
-
-      const content = JSON.stringify(products, null, 2);
-      const body = {
-        message: 'تحديث المنتجات - ' + new Date().toISOString(),
-        content: utf8ToBase64(content),
-        branch: cfg.branch
-      };
-      if (sha) body.sha = sha;
-
-      const putUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}`;
-      const putRes = await fetch(putUrl, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `token ${cfg.token}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-      });
-      if (!putRes.ok) {
-        const err = await putRes.json();
-        throw new Error(err.message || 'PUT failed');
-      }
-      const putData = await putRes.json();
-      currentFileSha = putData.content.sha;
-      showStatus('saveStatus', 'success', `✅ تم حفظ ${products.length} منتج على GitHub`);
-    } catch (e) {
-      showStatus('saveStatus', 'error', '❌ فشل الحفظ: ' + e.message);
-    }
-  }
-
-  // ====== إضافة منتج واحد ======
-  function saveProduct() {
-    const name = document.getElementById('nameInput').value.trim();
-    if (!name) {
-      showStatus('formStatus', 'error', '❌ اسم المنتج مطلوب');
-      return;
-    }
-    const product = {
-      id: Date.now() + Math.floor(Math.random() * 1000),
-      name: name,
-      category: document.getElementById('categoryInput').value,
-      badge: document.getElementById('badgeInput').value.trim(),
-      image: document.getElementById('imageInput').value.trim()
-    };
-    const editId = document.getElementById('editId').value;
-    if (editId) {
-      const idx = products.findIndex(p => String(p.id) === String(editId));
-      if (idx >= 0) {
-        product.id = products[idx].id;
-        products[idx] = product;
-      }
-    } else {
-      products.push(product);
-    }
-    renderProducts();
-    resetForm();
-    showStatus('formStatus', 'success', '✅ تم الحفظ محليًا. اضغط "حفظ التغييرات على GitHub" لرفعه.');
-  }
-
-  function editProduct(id) {
-    const p = products.find(x => String(x.id) === String(id));
-    if (!p) return;
-    document.getElementById('editId').value = p.id;
-    document.getElementById('nameInput').value = p.name || '';
-    document.getElementById('categoryInput').value = p.category || 'سيارات';
-    document.getElementById('badgeInput').value = p.badge || '';
-    document.getElementById('imageInput').value = p.image || '';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  function deleteProduct(id) {
-    if (!confirm('حذف هذا المنتج؟')) return;
-    products = products.filter(p => String(p.id) !== String(id));
-    renderProducts();
-  }
-
-  function resetForm() {
-    document.getElementById('editId').value = '';
-    document.getElementById('nameInput').value = '';
-    document.getElementById('badgeInput').value = '';
-    document.getElementById('imageInput').value = '';
-    document.getElementById('formStatus').innerHTML = '';
-  }
-
-  // ====== الإضافة الجماعية: نص بسيط ======
-  function bulkAddLines() {
-    const raw = document.getElementById('bulkLinesInput').value.trim();
-    if (!raw) {
-      showStatus('bulkStatus', 'error', '❌ الصق النص أولاً');
-      return;
-    }
-    const lines = raw.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
-    const newItems = [];
-    const errors = [];
-    lines.forEach((line, i) => {
-      const parts = line.split('|').map(s => s.trim());
-      const name = parts[0];
-      if (!name) {
-        errors.push(`سطر ${i + 1}: بدون اسم`);
-        return;
-      }
-      newItems.push({
-        id: Date.now() + i + Math.floor(Math.random() * 1000),
-        name: name,
-        category: parts[1] || 'أخرى',
-        badge: parts[2] || '',
-        image: parts[3] || ''
-      });
-    });
-    if (newItems.length === 0) {
-      showStatus('bulkStatus', 'error', '❌ لم يتم العثور على منتجات صالحة. ' + errors.join('، '));
-      return;
-    }
-    products = products.concat(newItems);
-    renderProducts();
-    document.getElementById('bulkLinesInput').value = '';
-    showStatus('bulkStatus', 'success', `✅ تمت إضافة ${newItems.length} منتج محليًا.${errors.length ? ' تحذيرات: ' + errors.join('، ') : ''}`);
-  }
-
-  // ====== الإضافة الجماعية: JSON ======
-  function bulkAddJson() {
-    const raw = document.getElementById('bulkJsonInput').value.trim();
-    if (!raw) {
-      showStatus('bulkStatus', 'error', '❌ الصق JSON أولاً');
-      return;
-    }
-    try {
-      let data = JSON.parse(raw);
-      if (!Array.isArray(data)) {
-        if (data && Array.isArray(data.products)) data = data.products;
-        else throw new Error('JSON يجب أن يكون مصفوفة [ ... ]');
-      }
-      const newItems = data.map((p, i) => ({
-        id: Date.now() + i + Math.floor(Math.random() * 1000),
-        name: String(p.name || '').trim(),
-        category: p.category || 'أخرى',
-        badge: p.badge || '',
-        image: p.image || ''
-      })).filter(p => p.name);
-
-      if (newItems.length === 0) {
-        showStatus('bulkStatus', 'error', '❌ لم يتم العثور على منتجات صالحة (كل منتج يحتاج name)');
-        return;
-      }
-      products = products.concat(newItems);
-      renderProducts();
-      document.getElementById('bulkJsonInput').value = '';
-      showStatus('bulkStatus', 'success', `✅ تمت إضافة ${newItems.length} منتج محليًا.`);
-    } catch (e) {
-      showStatus('bulkStatus', 'error', '❌ خطأ في JSON: ' + e.message);
-    }
-  }
-
-  // ====== الإضافة الجماعية: ملف ======
-  function bulkAddFile() {
-    const file = document.getElementById('bulkFileInput').files[0];
-    if (!file) {
-      showStatus('bulkStatus', 'error', '❌ اختر ملف أولاً');
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        let data = JSON.parse(e.target.result);
-        if (!Array.isArray(data)) {
-          if (data && Array.isArray(data.products)) data = data.products;
-          else throw new Error('الملف يجب أن يحتوي على مصفوفة [ ... ]');
-        }
-        const newItems = data.map((p, i) => ({
-          id: Date.now() + i + Math.floor(Math.random() * 1000),
-          name: String(p.name || '').trim(),
-          category: p.category || 'أخرى',
-          badge: p.badge || '',
-          image: p.image || ''
-        })).filter(p => p.name);
-
-        if (newItems.length === 0) {
-          showStatus('bulkStatus', 'error', '❌ لا توجد منتجات صالحة في الملف');
-          return;
-        }
-        products = products.concat(newItems);
-        renderProducts();
-        document.getElementById('bulkFileInput').value = '';
-        showStatus('bulkStatus', 'success', `✅ تمت إضافة ${newItems.length} منتج من الملف.`);
-      } catch (err) {
-        showStatus('bulkStatus', 'error', '❌ خطأ في الملف: ' + err.message);
-      }
-    };
-    reader.readAsText(file, 'UTF-8');
-  }
-
-  // ====== عرض المنتجات ======
-  function renderProducts() {
-    const list = document.getElementById('productsList');
-    document.getElementById('countSpan').textContent = products.length;
-    if (products.length === 0) {
-      list.innerHTML = '<p style="color:var(--gray);text-align:center;padding:20px;">لا توجد منتجات</p>';
-      return;
-    }
-    list.innerHTML = products.map(p => `
-      <div class="product-item">
-        <div class="info">
-          <div class="name">${p.name}</div>
-          <div class="meta">${p.category || ''}${p.badge ? ' • ' + p.badge : ''}</div>
-        </div>
-        <div class="actions">
-          <button class="btn-secondary" onclick="editProduct('${p.id}')">✏️ تعديل</button>
-          <button class="btn-danger" onclick="deleteProduct('${p.id}')">🗑️ حذف</button>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  function showStatus(id, type, msg) {
-    document.getElementById(id).innerHTML = `<div class="status ${type}">${msg}</div>`;
-  }
-
-  // ====== بدء التشغيل ======
-  if (sessionStorage.getItem('adminLoggedIn') === '1') {
-    showAdmin();
-  }
-</script>
+<script src="admin.js" defer></script>
 </body>
 </html>
