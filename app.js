@@ -1,6 +1,29 @@
 (function () {
   'use strict';
 
+  // ===== SVG Icons =====
+  var ICON_WHATSAPP =
+    '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+    '<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884"/>' +
+    '</svg>';
+
+  var ICON_PLAY =
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+    '<path d="M8 5v14l11-7z"/>' +
+    '</svg>';
+
+  var ICON_GEAR =
+    '<svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<circle cx="12" cy="12" r="3"/>' +
+    '<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>' +
+    '</svg>';
+
+  var ICON_EMPTY =
+    '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin:0 auto 16px;opacity:0.4;">' +
+    '<circle cx="11" cy="11" r="8"/>' +
+    '<path d="m21 21-4.35-4.35M8 11h6"/>' +
+    '</svg>';
+
   // ===== Utilities =====
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -12,7 +35,11 @@
     return isNaN(n) ? 0 : n;
   }
   function formatPrice(n) {
-    return n.toLocaleString('ar-EG');
+    try {
+      return n.toLocaleString('ar-EG');
+    } catch (e) {
+      return n.toLocaleString();
+    }
   }
 
   // ===== State =====
@@ -66,6 +93,7 @@
       var isEmpty = allProducts.length === 0;
       grid.innerHTML =
         '<div class="empty-state">' +
+          ICON_EMPTY +
           '<h3>' + (isEmpty ? 'لا توجد منتجات حالياً' : 'لا توجد نتائج مطابقة') + '</h3>' +
           '<p>' + (isEmpty ? 'يرجى العودة لاحقاً أو التواصل معنا للاستفسار' : 'جرّب تغيير كلمة البحث أو القسم') + '</p>' +
         '</div>';
@@ -84,9 +112,11 @@
 
     var imageHtml;
     if (p.image) {
-      imageHtml = '<img src="' + esc(p.image) + '" alt="' + esc(p.name) + '" loading="lazy" onerror="this.onerror=null;this.src=\'logo.png\';">';
+      imageHtml =
+        '<img src="' + esc(p.image) + '" alt="' + esc(p.name) +
+        '" loading="lazy" onerror="this.onerror=null;this.src=\'logo.png\';" />';
     } else {
-      imageHtml = '<div class="img-placeholder">⚙️</div>';
+      imageHtml = '<div class="img-placeholder">' + ICON_GEAR + '</div>';
     }
 
     var badgeHtml = p.badge ? '<span class="badge">' + esc(p.badge) + '</span>' : '';
@@ -96,14 +126,20 @@
 
     var videoBtnHtml = '';
     if (p.video && /^https?:\/\//.test(p.video)) {
-      videoBtnHtml = '<a href="' + esc(p.video) + '" target="_blank" rel="noopener" class="btn-video">▶ فيديو</a>';
+      videoBtnHtml =
+        '<a href="' + esc(p.video) + '" target="_blank" rel="noopener" class="btn-video">' +
+          ICON_PLAY + ' فيديو' +
+        '</a>';
     }
 
     var orderBtn;
     if (inStock) {
-      orderBtn = '<button class="btn-order" data-name="' + esc(p.name) + '">🛒 اطلب عبر واتساب</button>';
+      orderBtn =
+        '<button class="btn-order" data-name="' + esc(p.name) + '" type="button">' +
+          ICON_WHATSAPP + ' اطلب عبر واتساب' +
+        '</button>';
     } else {
-      orderBtn = '<button class="btn-order" disabled>غير متوفر</button>';
+      orderBtn = '<button class="btn-order" disabled type="button">غير متوفر</button>';
     }
 
     return (
