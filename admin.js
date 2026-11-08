@@ -1,14 +1,12 @@
 (function () {
   'use strict';
 
-  // ===== State =====
   var config = null;
   var products = [];
   var currentSha = null;
   var editingId = null;
   var uploadedImagePath = null;
 
-  // ===== Utilities =====
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -59,7 +57,6 @@
     return withRef ? base + '?ref=' + config.branch : base;
   }
 
-  // ===== Login =====
   function login() {
     var owner = document.getElementById('githubOwner').value.trim();
     var repo = document.getElementById('githubRepo').value.trim();
@@ -101,7 +98,6 @@
     location.reload();
   }
 
-  // ===== Load =====
   function loadProducts() {
     showMsg('saveMsg', 'info', '⏳ جاري تحميل المنتجات...');
     fetch(ghUrl('products.json', true), { headers: ghHeaders() })
@@ -132,7 +128,6 @@
       });
   }
 
-  // ===== Render =====
   function renderTable() {
     var tbody = document.getElementById('productsTableBody');
     if (!tbody) return;
@@ -162,7 +157,6 @@
     }).join('');
   }
 
-  // ===== Edit / Delete (global) =====
   window.editProduct = function (id) {
     var p = products.filter(function (x) { return String(x.id) === String(id); })[0];
     if (!p) return;
@@ -170,7 +164,7 @@
     uploadedImagePath = null;
     document.getElementById('prodId').value = p.id;
     document.getElementById('prodName').value = p.name || '';
-    document.getElementById('prodCategory').value = p.category || 'سيارات';
+    document.getElementById('prodCategory').value = p.category || 'رولمان بلي';
     document.getElementById('prodPrice').value = p.price != null ? p.price : '';
     document.getElementById('prodOldPrice').value = p.oldPrice != null ? p.oldPrice : '';
     document.getElementById('prodBadge').value = p.badge || '';
@@ -192,7 +186,6 @@
     saveProducts();
   };
 
-  // ===== Form Submit =====
   function handleFormSubmit(e) {
     e.preventDefault();
     var saveBtn = document.getElementById('saveBtn');
@@ -261,7 +254,6 @@
     });
   }
 
-  // ===== Upload Image =====
   function uploadImage(file) {
     return fileToBase64(file).then(function (base64) {
       var ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
@@ -289,7 +281,6 @@
     });
   }
 
-  // ===== Save Products =====
   function saveProducts() {
     showMsg('saveMsg', 'info', '⏳ جاري الحفظ على GitHub...');
 
@@ -337,7 +328,6 @@
       });
   }
 
-  // ===== Reset =====
   function resetForm() {
     document.getElementById('productForm').reset();
     document.getElementById('prodId').value = '';
@@ -350,7 +340,6 @@
     uploadedImagePath = null;
   }
 
-  // ===== Image Preview =====
   function handleImageChange(e) {
     var file = e.target.files[0];
     if (!file) return;
@@ -367,7 +356,6 @@
     reader.readAsDataURL(file);
   }
 
-  // ===== Bind =====
   var loginForm = document.getElementById('loginForm');
   if (loginForm) loginForm.addEventListener('submit', function (e) { e.preventDefault(); login(); });
 
@@ -386,7 +374,6 @@
   var imageFile = document.getElementById('prodImageFile');
   if (imageFile) imageFile.addEventListener('change', handleImageChange);
 
-  // ===== Auto-login =====
   var stored = sessionStorage.getItem('gh_admin');
   if (stored) {
     try {
