@@ -70,7 +70,7 @@
       <button class="btn-secondary" id="logoutBtn">🚪 خروج</button>
     </div>
 
-    <!-- Export / Import -->
+    <!-- Export -->
     <div class="card">
       <h2>📥 تصدير المنتجات (دفعة واحدة)</h2>
       <p class="hint">حمّل كل المنتجات كملف. اختر "بدون أسعار" لو هتبعت الملف لحد تاني.</p>
@@ -81,13 +81,15 @@
       </div>
     </div>
 
+    <!-- Import -->
     <div class="card">
       <h2>📤 استيراد منتجات (دفعة واحدة)</h2>
-      <p class="hint">ارفع ملف JSON لإضافة أو تحديث منتجات متعددة.</p>
-      <input type="file" id="importFile" accept=".json,application/json">
+      <p class="hint">ارفع ملف JSON أو CSV (من Excel) لإضافة أو تحديث منتجات متعددة.</p>
+      <input type="file" id="importFile" accept=".json,.csv,application/json,text/csv">
+      <p class="hint" style="margin-top:8px;">📌 للـ CSV: العمود الأول لازم يكون <code>name</code> أو <code>الاسم</code>. احفظ الملف من Excel بصيغة "CSV UTF-8".</p>
       <div class="btn-group">
-        <button class="btn-primary" onclick="importJSON('merge')">➕ استيراد (دمج)</button>
-        <button class="btn-secondary" onclick="importJSON('replace')">🔄 استيراد (استبدال)</button>
+        <button class="btn-primary" onclick="importFile('merge')">➕ استيراد (دمج)</button>
+        <button class="btn-secondary" onclick="importFile('replace')">🔄 استيراد (استبدال)</button>
       </div>
       <div id="importMsg"></div>
     </div>
