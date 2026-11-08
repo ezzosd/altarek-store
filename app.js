@@ -1,10 +1,14 @@
 (function () {
   'use strict';
 
-  // ===== SVG Icons =====
   var ICON_WHATSAPP =
     '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
     '<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884"/>' +
+    '</svg>';
+
+  var ICON_FACEBOOK =
+    '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+    '<path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>' +
     '</svg>';
 
   var ICON_PLAY =
@@ -13,7 +17,7 @@
     '</svg>';
 
   var ICON_GEAR =
-    '<svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
     '<circle cx="12" cy="12" r="3"/>' +
     '<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>' +
     '</svg>';
@@ -24,35 +28,20 @@
     '<path d="m21 21-4.35-4.35M8 11h6"/>' +
     '</svg>';
 
-  // ===== Utilities =====
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
-  function num(v) {
-    var n = Number(v);
-    return isNaN(n) ? 0 : n;
-  }
-  function formatPrice(n) {
-    try {
-      return n.toLocaleString('ar-EG');
-    } catch (e) {
-      return n.toLocaleString();
-    }
-  }
 
-  // ===== State =====
   var allProducts = [];
   var currentCategory = 'all';
   var currentSearch = '';
 
-  // ===== DOM =====
   var grid = document.getElementById('storeProducts');
   var searchInput = document.getElementById('searchInput');
   var categoryCards = document.querySelectorAll('.category-card[data-category]');
 
-  // ===== Load =====
   function loadProducts() {
     fetch('products.json?v=' + Date.now(), { cache: 'no-store' })
       .then(function (res) {
@@ -72,7 +61,6 @@
       });
   }
 
-  // ===== Filter =====
   function filterProducts() {
     return allProducts.filter(function (p) {
       if (currentCategory !== 'all' && (p.category || '') !== currentCategory) return false;
@@ -84,7 +72,6 @@
     });
   }
 
-  // ===== Render =====
   function render() {
     if (!grid) return;
     var filtered = filterProducts();
@@ -104,69 +91,54 @@
   }
 
   function renderCard(p) {
-    var price = num(p.price);
-    var old = num(p.oldPrice);
-    var hasDiscount = old > price && old > 0;
-    var discountPct = hasDiscount ? Math.round(((old - price) / old) * 100) : 0;
     var inStock = p.stock !== false;
 
     var imageHtml;
     if (p.image) {
-      imageHtml =
-        '<img src="' + esc(p.image) + '" alt="' + esc(p.name) +
+      imageHtml = '<img src="' + esc(p.image) + '" alt="' + esc(p.name) +
         '" loading="lazy" onerror="this.onerror=null;this.src=\'logo.png\';" />';
     } else {
-      imageHtml = '<div class="img-placeholder">' + ICON_GEAR + '</div>';
+      imageHtml = '<div class="img-placeholder">' + ICON_GEAR +
+        '<span class="img-placeholder-text">لا توجد صورة</span></div>';
     }
 
     var badgeHtml = p.badge ? '<span class="badge">' + esc(p.badge) + '</span>' : '';
-    var discountHtml = hasDiscount ? '<span class="badge">خصم ' + discountPct + '%</span>' : '';
     var stockHtml = !inStock ? '<span class="out-of-stock">غير متوفر</span>' : '';
-    var oldPriceHtml = hasDiscount ? '<span class="old-price">' + formatPrice(old) + ' ج.م</span>' : '';
 
     var videoBtnHtml = '';
     if (p.video && /^https?:\/\//.test(p.video)) {
-      videoBtnHtml =
-        '<a href="' + esc(p.video) + '" target="_blank" rel="noopener" class="btn-video">' +
-          ICON_PLAY + ' فيديو' +
-        '</a>';
+      videoBtnHtml = '<a href="' + esc(p.video) + '" target="_blank" rel="noopener" class="btn-video" title="فيديو المنتج">' +
+        ICON_PLAY + '</a>';
     }
 
-    var orderBtn;
+    var waBtn, fbBtn;
     if (inStock) {
-      orderBtn =
-        '<button class="btn-order" data-name="' + esc(p.name) + '" type="button">' +
-          ICON_WHATSAPP + ' اطلب عبر واتساب' +
-        '</button>';
+      waBtn = '<button class="btn-order btn-whatsapp" data-name="' + esc(p.name) + '" type="button" title="اطلب عبر واتساب">' +
+        ICON_WHATSAPP + '<span>واتساب</span></button>';
+      fbBtn = '<a href="https://m.me/61562790860633" target="_blank" rel="noopener" class="btn-order btn-facebook" title="استفسر عبر فيسبوك">' +
+        ICON_FACEBOOK + '<span>فيسبوك</span></a>';
     } else {
-      orderBtn = '<button class="btn-order" disabled type="button">غير متوفر</button>';
+      waBtn = '<button class="btn-order" disabled type="button">غير متوفر</button>';
+      fbBtn = '';
     }
 
     return (
       '<div class="product-card">' +
-        '<div class="product-image">' +
-          imageHtml + badgeHtml + discountHtml + stockHtml +
-        '</div>' +
+        '<div class="product-image">' + imageHtml + badgeHtml + stockHtml + '</div>' +
         '<div class="product-info">' +
           '<div class="product-category">' + esc(p.category || '') + '</div>' +
           '<h3 class="product-title">' + esc(p.name || '') + '</h3>' +
-          '<div class="product-price">' +
-            '<span class="current-price">' + formatPrice(price) + ' ج.م</span>' +
-            oldPriceHtml +
-          '</div>' +
-          '<div style="display:flex; gap:8px; margin-top:auto;">' + orderBtn + videoBtnHtml + '</div>' +
+          '<div class="product-actions">' + waBtn + fbBtn + videoBtnHtml + '</div>' +
         '</div>' +
       '</div>'
     );
   }
 
-  // ===== Order =====
   function orderProduct(name) {
     var msg = encodeURIComponent('مرحباً، أريد الاستفسار عن المنتج: ' + name);
     window.open('https://wa.me/201110666981?text=' + msg, '_blank', 'noopener');
   }
 
-  // ===== Events =====
   if (grid) {
     grid.addEventListener('click', function (e) {
       var btn = e.target.closest('.btn-order[data-name]');
@@ -202,7 +174,6 @@
     });
   });
 
-  // ===== Hidden admin access =====
   document.addEventListener('keydown', function (e) {
     if (e.ctrlKey && e.shiftKey && e.key === 'A') {
       e.preventDefault();
@@ -226,11 +197,9 @@
     });
   }
 
-  // ===== Year =====
   var yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  // ===== Init =====
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadProducts);
   } else {
