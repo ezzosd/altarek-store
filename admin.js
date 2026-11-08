@@ -57,6 +57,69 @@
     return withRef ? base + '?ref=' + config.branch : base;
   }
 
+  // ===== CSV Parser =====
+  function parseCSV(text) {
+    // إزالة BOM لو موجود (ملفات Excel UTF-8)
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+    var rows = [];
+    var row = [];
+    var cell = '';
+    var inQuotes = false;
+    var i = 0;
+    while (i < text.length) {
+      var ch = text[i];
+      if (inQuotes) {
+        if (ch === '"') {
+          if (text[i + 1] === '"') { cell += '"'; i += 2; continue; }
+          inQuotes = false;
+        } else {
+          cell += ch;
+        }
+      } else {
+        if (ch === '"') { inQuotes = true; }
+        else if (ch === ',') { row.push(cell); cell = ''; }
+        else if (ch === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
+        else if (ch === '\r') { /* skip */ }
+        else { cell += ch; }
+      }
+      i++;
+    }
+    if (cell !== '' || row.length > 0) { row.push(cell); rows.push(row); }
+    return rows;
+  }
+
+  function csvToProducts(text) {
+    var rows = parseCSV(text);
+    if (rows.length < 2) throw new Error('الملف فاضي أو غير صالح');
+    var header = rows[0].map(function (h) { return h.trim().toLowerCase(); });
+    var result = [];
+    for (var r = 1; r < rows.length; r++) {
+      var row = rows[r];
+      if (!row || row.length === 0 || !row[0]) continue;
+      var obj = {};
+      for (var c = 0; c < header.length; c++) {
+        obj[header[c]] = row[c] !== undefined ? row[c] : '';
+      }
+      var name = (obj.name || obj['الاسم'] || obj['اسم المنتج'] || '').trim();
+      if (!name) continue;
+      var stock = obj.stock || obj['متوفر'] || 'true';
+      result.push({
+        id: (obj.id || Date.now().toString() + '_' + r).toString(),
+        name: name,
+        category: (obj.category || obj['القسم'] || obj['النوع'] || 'رولمان بلي').trim(),
+        price: Number(obj.price || obj['السعر'] || 0),
+        oldPrice: Number(obj.oldprice || obj['السعر القديم'] || 0),
+        badge: (obj.badge || obj['الشارة'] || '').trim(),
+        image: (obj.image || obj['الصورة'] || '').trim(),
+        video: (obj.video || obj['الفيديو'] || '').trim(),
+        description: (obj.description || obj['الوصف'] || '').trim(),
+        stock: String(stock).toLowerCase() !== 'false' && String(stock) !== 'لا'
+      });
+    }
+    return result;
+  }
+
+  // ===== Login =====
   function login() {
     var owner = document.getElementById('githubOwner').value.trim();
     var repo = document.getElementById('githubRepo').value.trim();
@@ -128,12 +191,9 @@
     }).join('');
   }
 
-  // ===== Export / Import =====
+  // ===== Export =====
   window.exportJSON = function (withoutPrices) {
-    if (products.length === 0) {
-      alert('❌ لا توجد منتجات لتصديرها');
-      return;
-    }
+    if (products.length === 0) { alert('❌ لا توجد منتجات لتصديرها'); return; }
     var data = products;
     if (withoutPrices) {
       data = products.map(function (p) {
@@ -147,11 +207,8 @@
   };
 
   window.exportCSV = function () {
-    if (products.length === 0) {
-      alert('❌ لا توجد منتجات لتصديرها');
-      return;
-    }
-    var headers = ['id', 'name', 'category', 'price', 'oldPrice', 'badge', 'image', 'video', 'description', 'stock'];
+    if (products.length === 0) { alert('❌ لا توجد منتجات لتصديرها'); return; }
+    var headers = ['id', 'name', 'category', 'badge', 'image', 'video', 'description', 'stock'];
     var rows = [headers.join(',')];
     products.forEach(function (p) {
       var row = headers.map(function (h) {
@@ -164,24 +221,33 @@
       rows.push(row.join(','));
     });
     var csv = '\uFEFF' + rows.join('\n');
-    var filename = 'products-' + new Date().toISOString().slice(0, 10) + '.csv';
-    downloadFile(csv, filename, 'text/csv;charset=utf-8');
+    downloadFile(csv, 'products-' + new Date().toISOString().slice(0, 10) + '.csv', 'text/csv;charset=utf-8');
     showMsg('saveMsg', 'success', '✅ تم تصدير CSV');
   };
 
-  window.importJSON = function (mode) {
+  // ===== Import (JSON + CSV) =====
+  window.importFile = function (mode) {
     var file = document.getElementById('importFile').files[0];
-    if (!file) { alert('❌ اختر ملف JSON أولاً'); return; }
+    if (!file) { alert('❌ اختر ملف أولاً'); return; }
     if (mode === 'replace' && !confirm('⚠️ هيتم حذف كل المنتجات الحالية واستبدالها. متأكد؟')) return;
 
+    var isCSV = /\.csv$/i.test(file.name);
     var reader = new FileReader();
     reader.onload = function (e) {
       try {
-        var data = JSON.parse(e.target.result);
-        if (!Array.isArray(data)) {
-          if (data && Array.isArray(data.products)) data = data.products;
-          else throw new Error('الملف يجب أن يكون مصفوفة JSON');
+        var data;
+        if (isCSV) {
+          data = csvToProducts(e.target.result);
+        } else {
+          data = JSON.parse(e.target.result);
+          if (!Array.isArray(data)) {
+            if (data && Array.isArray(data.products)) data = data.products;
+            else throw new Error('الملف يجب أن يكون مصفوفة JSON');
+          }
         }
+
+        if (data.length === 0) throw new Error('لم يتم العثور على منتجات صالحة');
+
         if (mode === 'replace') {
           products = data;
         } else {
@@ -194,9 +260,10 @@
             else products.push(item);
           });
         }
+
         return saveProducts().then(function () {
           document.getElementById('importFile').value = '';
-          showMsg('importMsg', 'success', '✅ تم استيراد ' + data.length + ' منتج');
+          showMsg('importMsg', 'success', '✅ تم استيراد ' + data.length + ' منتج (' + (isCSV ? 'CSV' : 'JSON') + ')');
         });
       } catch (err) {
         showMsg('importMsg', 'error', '❌ ' + err.message);
@@ -366,6 +433,7 @@
     reader.readAsDataURL(file);
   }
 
+  // ===== Bind =====
   var loginForm = document.getElementById('loginForm');
   if (loginForm) loginForm.addEventListener('submit', function (e) { e.preventDefault(); login(); });
   var logoutBtn = document.getElementById('logoutBtn');
