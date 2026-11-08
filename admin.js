@@ -62,35 +62,23 @@
     var repo = document.getElementById('githubRepo').value.trim();
     var branch = document.getElementById('githubBranch').value.trim() || 'main';
     var token = document.getElementById('githubToken').value.trim();
-
     if (!owner || !repo || !token) {
       showMsg('loginMsg', 'error', '❌ املأ جميع الحقول');
       return;
     }
-
     showMsg('loginMsg', 'info', '⏳ جاري التحقق...');
-
     fetch('https://api.github.com/repos/' + owner + '/' + repo, {
-      headers: {
-        'Authorization': 'token ' + token,
-        'Accept': 'application/vnd.github.v3+json'
-      }
+      headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
     })
       .then(function (res) {
-        if (!res.ok) {
-          return res.json().then(function (err) {
-            throw new Error(err.message || 'فشل التحقق');
-          });
-        }
+        if (!res.ok) return res.json().then(function (err) { throw new Error(err.message || 'فشل التحقق'); });
         config = { owner: owner, repo: repo, branch: branch, token: token };
         sessionStorage.setItem('gh_admin', JSON.stringify(config));
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('adminPanel').classList.remove('hidden');
         loadProducts();
       })
-      .catch(function (e) {
-        showMsg('loginMsg', 'error', '❌ ' + e.message);
-      });
+      .catch(function (e) { showMsg('loginMsg', 'error', '❌ ' + e.message); });
   }
 
   function logout() {
@@ -103,17 +91,12 @@
     fetch(ghUrl('products.json', true), { headers: ghHeaders() })
       .then(function (res) {
         if (res.status === 404) {
-          products = [];
-          currentSha = null;
+          products = []; currentSha = null;
           renderTable();
           showMsg('saveMsg', 'info', 'ℹ️ الملف غير موجود. سيُنشأ عند الحفظ.');
           return null;
         }
-        if (!res.ok) {
-          return res.json().then(function (err) {
-            throw new Error(err.message || 'HTTP ' + res.status);
-          });
-        }
+        if (!res.ok) return res.json().then(function (err) { throw new Error(err.message || 'HTTP ' + res.status); });
         return res.json().then(function (data) {
           currentSha = data.sha;
           var content = base64ToUtf8(data.content.replace(/\n/g, ''));
@@ -123,45 +106,122 @@
           showMsg('saveMsg', 'success', '✅ تم تحميل ' + products.length + ' منتج');
         });
       })
-      .catch(function (e) {
-        showMsg('saveMsg', 'error', '❌ فشل التحميل: ' + e.message);
-      });
+      .catch(function (e) { showMsg('saveMsg', 'error', '❌ فشل التحميل: ' + e.message); });
   }
 
   function renderTable() {
     var tbody = document.getElementById('productsTableBody');
     if (!tbody) return;
     document.getElementById('productCount').textContent = products.length;
-
     if (products.length === 0) {
       tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:#64748b;">لا توجد منتجات</td></tr>';
       return;
     }
-
     tbody.innerHTML = products.map(function (p) {
       var price = Number(p.price) || 0;
       var image = p.image
         ? '<img src="' + esc(p.image) + '" alt="" style="width:50px;height:50px;object-fit:cover;border-radius:6px;">'
         : '<div style="width:50px;height:50px;background:#f1f5f9;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:24px;">⚙️</div>';
-
-      return '<tr>' +
-        '<td>' + image + '</td>' +
-        '<td>' + esc(p.name) + '</td>' +
-        '<td>' + price + ' ج.م</td>' +
-        '<td>' + esc(p.category || '') + '</td>' +
-        '<td>' +
-          '<button class="btn-secondary" onclick="editProduct(\'' + esc(p.id) + '\')">✏️ تعديل</button> ' +
-          '<button class="btn-danger" onclick="deleteProduct(\'' + esc(p.id) + '\')">🗑️ حذف</button>' +
-        '</td>' +
-      '</tr>';
+      return '<tr><td>' + image + '</td><td>' + esc(p.name) + '</td><td>' + esc(p.category || '') + '</td><td>' + price + ' ج.م</td><td>' +
+        '<button class="btn-secondary" onclick="editProduct(\'' + esc(p.id) + '\')">✏️</button> ' +
+        '<button class="btn-danger" onclick="deleteProduct(\'' + esc(p.id) + '\')">🗑️</button></td></tr>';
     }).join('');
   }
 
+  // ===== Export / Import =====
+  window.exportJSON = function (withoutPrices) {
+    if (products.length === 0) {
+      alert('❌ لا توجد منتجات لتصديرها');
+      return;
+    }
+    var data = products;
+    if (withoutPrices) {
+      data = products.map(function (p) {
+        var copy = {}; for (var k in p) { if (k !== 'price' && k !== 'oldPrice') copy[k] = p[k]; }
+        return copy;
+      });
+    }
+    var filename = 'products-' + new Date().toISOString().slice(0, 10) + (withoutPrices ? '-no-prices' : '') + '.json';
+    downloadFile(JSON.stringify(data, null, 2), filename, 'application/json');
+    showMsg('saveMsg', 'success', '✅ تم تصدير ' + data.length + ' منتج');
+  };
+
+  window.exportCSV = function () {
+    if (products.length === 0) {
+      alert('❌ لا توجد منتجات لتصديرها');
+      return;
+    }
+    var headers = ['id', 'name', 'category', 'price', 'oldPrice', 'badge', 'image', 'video', 'description', 'stock'];
+    var rows = [headers.join(',')];
+    products.forEach(function (p) {
+      var row = headers.map(function (h) {
+        var val = p[h] === undefined || p[h] === null ? '' : String(p[h]);
+        if (val.indexOf(',') !== -1 || val.indexOf('"') !== -1 || val.indexOf('\n') !== -1) {
+          val = '"' + val.replace(/"/g, '""') + '"';
+        }
+        return val;
+      });
+      rows.push(row.join(','));
+    });
+    var csv = '\uFEFF' + rows.join('\n');
+    var filename = 'products-' + new Date().toISOString().slice(0, 10) + '.csv';
+    downloadFile(csv, filename, 'text/csv;charset=utf-8');
+    showMsg('saveMsg', 'success', '✅ تم تصدير CSV');
+  };
+
+  window.importJSON = function (mode) {
+    var file = document.getElementById('importFile').files[0];
+    if (!file) { alert('❌ اختر ملف JSON أولاً'); return; }
+    if (mode === 'replace' && !confirm('⚠️ هيتم حذف كل المنتجات الحالية واستبدالها. متأكد؟')) return;
+
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        var data = JSON.parse(e.target.result);
+        if (!Array.isArray(data)) {
+          if (data && Array.isArray(data.products)) data = data.products;
+          else throw new Error('الملف يجب أن يكون مصفوفة JSON');
+        }
+        if (mode === 'replace') {
+          products = data;
+        } else {
+          data.forEach(function (item) {
+            var idx = -1;
+            for (var i = 0; i < products.length; i++) {
+              if (String(products[i].id) === String(item.id)) { idx = i; break; }
+            }
+            if (idx >= 0) products[idx] = item;
+            else products.push(item);
+          });
+        }
+        return saveProducts().then(function () {
+          document.getElementById('importFile').value = '';
+          showMsg('importMsg', 'success', '✅ تم استيراد ' + data.length + ' منتج');
+        });
+      } catch (err) {
+        showMsg('importMsg', 'error', '❌ ' + err.message);
+      }
+    };
+    reader.readAsText(file, 'UTF-8');
+  };
+
+  function downloadFile(content, filename, mimeType) {
+    var blob = new Blob([content], { type: mimeType });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 100);
+  }
+
+  // ===== Edit / Delete =====
   window.editProduct = function (id) {
     var p = products.filter(function (x) { return String(x.id) === String(id); })[0];
     if (!p) return;
-    editingId = p.id;
-    uploadedImagePath = null;
+    editingId = p.id; uploadedImagePath = null;
     document.getElementById('prodId').value = p.id;
     document.getElementById('prodName').value = p.name || '';
     document.getElementById('prodCategory').value = p.category || 'رولمان بلي';
@@ -181,34 +241,27 @@
   };
 
   window.deleteProduct = function (id) {
-    if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
+    if (!confirm('حذف هذا المنتج؟')) return;
     products = products.filter(function (p) { return String(p.id) !== String(id); });
     saveProducts();
   };
 
+  // ===== Form Submit =====
   function handleFormSubmit(e) {
     e.preventDefault();
     var saveBtn = document.getElementById('saveBtn');
     var name = document.getElementById('prodName').value.trim();
-
-    if (!name) {
-      showMsg('formMsg', 'error', '❌ اسم المنتج مطلوب');
-      return;
-    }
-
-    saveBtn.disabled = true;
-    saveBtn.textContent = '⏳ جاري الحفظ...';
+    if (!name) { showMsg('formMsg', 'error', '❌ اسم المنتج مطلوب'); return; }
+    saveBtn.disabled = true; saveBtn.textContent = '⏳ جاري الحفظ...';
 
     var imageUrl = document.getElementById('prodImageUrl').value.trim();
     var fileInput = document.getElementById('prodImageFile');
     var imagePromise;
-
     if (fileInput.files.length > 0) {
       var file = fileInput.files[0];
       if (file.size > 750 * 1024) {
-        showMsg('formMsg', 'error', '❌ الصورة كبيرة جداً (الحد 750KB)');
-        saveBtn.disabled = false;
-        saveBtn.textContent = editingId ? '💾 حفظ التعديلات' : '💾 إضافة المنتج';
+        showMsg('formMsg', 'error', '❌ الصورة كبيرة (الحد 750KB)');
+        saveBtn.disabled = false; saveBtn.textContent = editingId ? '💾 حفظ التعديلات' : '💾 إضافة المنتج';
         return;
       }
       showMsg('formMsg', 'info', '⏳ جاري رفع الصورة...');
@@ -230,18 +283,13 @@
         description: document.getElementById('prodDesc').value.trim(),
         stock: document.getElementById('prodStock').checked
       };
-
       if (editingId) {
         var idx = -1;
-        for (var i = 0; i < products.length; i++) {
-          if (String(products[i].id) === String(editingId)) { idx = i; break; }
-        }
-        if (idx >= 0) products[idx] = product;
-        else products.push(product);
+        for (var i = 0; i < products.length; i++) { if (String(products[i].id) === String(editingId)) { idx = i; break; } }
+        if (idx >= 0) products[idx] = product; else products.push(product);
       } else {
         products.push(product);
       }
-
       return saveProducts().then(function () {
         resetForm();
         showMsg('formMsg', 'success', '✅ تم الحفظ بنجاح');
@@ -258,64 +306,32 @@
     return fileToBase64(file).then(function (base64) {
       var ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
       var filename = 'images/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
-
       return fetch(ghUrl(filename), {
-        method: 'PUT',
-        headers: ghHeaders(),
-        body: JSON.stringify({
-          message: 'Upload ' + file.name,
-          content: base64,
-          branch: config.branch
-        })
+        method: 'PUT', headers: ghHeaders(),
+        body: JSON.stringify({ message: 'Upload ' + file.name, content: base64, branch: config.branch })
       }).then(function (res) {
-        if (!res.ok) {
-          return res.json().then(function (err) {
-            throw new Error('فشل رفع الصورة: ' + (err.message || res.status));
-          });
-        }
-        return res.json().then(function (data) {
-          uploadedImagePath = data.content.path;
-          return uploadedImagePath;
-        });
+        if (!res.ok) return res.json().then(function (err) { throw new Error('فشل رفع الصورة: ' + (err.message || res.status)); });
+        return res.json().then(function (data) { uploadedImagePath = data.content.path; return uploadedImagePath; });
       });
     });
   }
 
   function saveProducts() {
     showMsg('saveMsg', 'info', '⏳ جاري الحفظ على GitHub...');
-
     return fetch(ghUrl('products.json', true), { headers: ghHeaders() })
       .then(function (headRes) {
         var sha = null;
-        if (headRes.ok) {
-          return headRes.json().then(function (data) {
-            sha = data.sha;
-            return sha;
-          });
-        }
+        if (headRes.ok) return headRes.json().then(function (data) { sha = data.sha; return sha; });
         return null;
       })
       .then(function (sha) {
         var content = JSON.stringify(products, null, 2);
-        var body = {
-          message: 'تحديث المنتجات - ' + new Date().toISOString(),
-          content: utf8ToBase64(content),
-          branch: config.branch
-        };
+        var body = { message: 'تحديث المنتجات - ' + new Date().toISOString(), content: utf8ToBase64(content), branch: config.branch };
         if (sha) body.sha = sha;
-
-        return fetch(ghUrl('products.json'), {
-          method: 'PUT',
-          headers: ghHeaders(),
-          body: JSON.stringify(body)
-        });
+        return fetch(ghUrl('products.json'), { method: 'PUT', headers: ghHeaders(), body: JSON.stringify(body) });
       })
       .then(function (res) {
-        if (!res.ok) {
-          return res.json().then(function (err) {
-            throw new Error(err.message || 'فشل الحفظ');
-          });
-        }
+        if (!res.ok) return res.json().then(function (err) { throw new Error(err.message || 'فشل الحفظ'); });
         return res.json().then(function (data) {
           currentSha = data.content.sha;
           renderTable();
@@ -336,41 +352,30 @@
     document.getElementById('formTitle').textContent = 'إضافة منتج جديد';
     document.getElementById('saveBtn').textContent = '💾 إضافة المنتج';
     document.getElementById('formMsg').innerHTML = '';
-    editingId = null;
-    uploadedImagePath = null;
+    editingId = null; uploadedImagePath = null;
   }
 
   function handleImageChange(e) {
     var file = e.target.files[0];
     if (!file) return;
-    if (file.size > 750 * 1024) {
-      alert('❌ الصورة كبيرة جداً (الحد 750KB)');
-      e.target.value = '';
-      return;
-    }
+    if (file.size > 750 * 1024) { alert('❌ الصورة كبيرة (الحد 750KB)'); e.target.value = ''; return; }
     var reader = new FileReader();
     reader.onload = function (ev) {
-      document.getElementById('imagePreview').innerHTML =
-        '<img src="' + ev.target.result + '" style="height:80px;border-radius:8px;border:1px solid #e2e8f0;">';
+      document.getElementById('imagePreview').innerHTML = '<img src="' + ev.target.result + '" style="height:80px;border-radius:8px;border:1px solid #e2e8f0;">';
     };
     reader.readAsDataURL(file);
   }
 
   var loginForm = document.getElementById('loginForm');
   if (loginForm) loginForm.addEventListener('submit', function (e) { e.preventDefault(); login(); });
-
   var logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) logoutBtn.addEventListener('click', logout);
-
   var productForm = document.getElementById('productForm');
   if (productForm) productForm.addEventListener('submit', handleFormSubmit);
-
   var resetBtn = document.getElementById('resetBtn');
   if (resetBtn) resetBtn.addEventListener('click', resetForm);
-
   var reloadBtn = document.getElementById('reloadBtn');
   if (reloadBtn) reloadBtn.addEventListener('click', loadProducts);
-
   var imageFile = document.getElementById('prodImageFile');
   if (imageFile) imageFile.addEventListener('change', handleImageChange);
 
@@ -385,8 +390,6 @@
       document.getElementById('loginScreen').classList.add('hidden');
       document.getElementById('adminPanel').classList.remove('hidden');
       loadProducts();
-    } catch (e) {
-      sessionStorage.removeItem('gh_admin');
-    }
+    } catch (e) { sessionStorage.removeItem('gh_admin'); }
   }
 })();
