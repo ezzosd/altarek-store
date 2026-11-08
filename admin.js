@@ -1,254 +1,405 @@
-// حماية: إذا لم تكن هذه صفحة الإدارة، توقف عن العمل
-if (!document.getElementById('githubToken')) {
-    console.log("Not admin page");
-} else {
-    let currentProducts = [];
-    const GH_FILE_PATH = 'products.json';
-    const GH_BRANCH = 'main';
+(function () {
+  'use strict';
 
-    // دوال جلب القيم مباشرة من الخانات
-    const GH_OWNER = () => document.getElementById('githubOwner').value.trim();
-    const GH_REPO = () => document.getElementById('githubRepo').value.trim();
-    const GH_TOKEN = () => document.getElementById('githubToken').value.trim();
+  // ===== State =====
+  var config = null;
+  var products = [];
+  var currentSha = null;
+  var editingId = null;
+  var uploadedImagePath = null;
 
-    window.saveToken = function() {
-        localStorage.setItem('gh_token', GH_TOKEN());
-        localStorage.setItem('gh_owner', GH_OWNER());
-        localStorage.setItem('gh_repo', GH_REPO());
-        checkTokenStatus();
+  // ===== Utilities =====
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function utf8ToBase64(str) {
+    var bytes = new TextEncoder().encode(str);
+    var binary = '';
+    for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary);
+  }
+
+  function base64ToUtf8(str) {
+    var binary = atob(str);
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+
+  function fileToBase64(file) {
+    return file.arrayBuffer().then(function (buffer) {
+      var bytes = new Uint8Array(buffer);
+      var binary = '';
+      for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+      return btoa(binary);
+    });
+  }
+
+  function showMsg(id, type, msg) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = '<div class="status ' + type + '">' + esc(msg) + '</div>';
+  }
+
+  function ghHeaders(extra) {
+    var h = {
+      'Authorization': 'token ' + config.token,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
     };
+    if (extra) for (var k in extra) h[k] = extra[k];
+    return h;
+  }
 
-    function loadSettings() {
-        document.getElementById('githubToken').value = localStorage.getItem('gh_token') || '';
-        document.getElementById('githubOwner').value = localStorage.getItem('gh_owner') || 'ezzosd'; // وضع اسمك كافتراضي
-        document.getElementById('githubRepo').value = localStorage.getItem('gh_repo') || 'altarek-store'; // وضع اسم المستودع كافتراضي
-        checkTokenStatus();
+  function ghUrl(path, withRef) {
+    var base = 'https://api.github.com/repos/' + config.owner + '/' + config.repo + '/contents/' + path;
+    return withRef ? base + '?ref=' + config.branch : base;
+  }
+
+  // ===== Login =====
+  function login() {
+    var owner = document.getElementById('githubOwner').value.trim();
+    var repo = document.getElementById('githubRepo').value.trim();
+    var branch = document.getElementById('githubBranch').value.trim() || 'main';
+    var token = document.getElementById('githubToken').value.trim();
+
+    if (!owner || !repo || !token) {
+      showMsg('loginMsg', 'error', '❌ املأ جميع الحقول');
+      return;
     }
 
-    function checkTokenStatus() {
-        const status = document.getElementById('tokenStatus');
-        if (GH_TOKEN() && GH_OWNER() && GH_REPO()) {
-            status.innerHTML = '✅ جاهز للحفظ.';
-            status.style.color = 'green';
-        } else {
-            status.innerHTML = '⚠️ يرجى إدخال جميع الإعدادات (التوكن، المستخدم، المستودع).';
-            status.style.color = 'red';
+    showMsg('loginMsg', 'info', '⏳ جاري التحقق...');
+
+    fetch('https://api.github.com/repos/' + owner + '/' + repo, {
+      headers: {
+        'Authorization': 'token ' + token,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    })
+      .then(function (res) {
+        if (!res.ok) {
+          return res.json().then(function (err) {
+            throw new Error(err.message || 'فشل التحقق');
+          });
         }
-    }
+        config = { owner: owner, repo: repo, branch: branch, token: token };
+        sessionStorage.setItem('gh_admin', JSON.stringify(config));
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('adminPanel').classList.remove('hidden');
+        loadProducts();
+      })
+      .catch(function (e) {
+        showMsg('loginMsg', 'error', '❌ ' + e.message);
+      });
+  }
 
-    async function fetchProductsFromGitHub() {
-        try {
-            const response = await fetch(`https://api.github.com/repos/${GH_OWNER()}/${GH_REPO()}/contents/${GH_FILE_PATH}?ref=${GH_BRANCH}`, {
-                headers: { 'Authorization': `token ${GH_TOKEN()}` }
-            });
-            if (response.status === 404) return { products: [], sha: null };
-            
-            const data = await response.json();
-            if (data.message) throw new Error(data.message);
-            
-            const content = decodeURIComponent(escape(atob(data.content)));
-            return { products: JSON.parse(content), sha: data.sha };
-        } catch (error) {
-            console.error('خطأ في الجلب:', error);
-            return { products: [], sha: null, error: error.message };
+  function logout() {
+    sessionStorage.removeItem('gh_admin');
+    location.reload();
+  }
+
+  // ===== Load =====
+  function loadProducts() {
+    showMsg('saveMsg', 'info', '⏳ جاري تحميل المنتجات...');
+    fetch(ghUrl('products.json', true), { headers: ghHeaders() })
+      .then(function (res) {
+        if (res.status === 404) {
+          products = [];
+          currentSha = null;
+          renderTable();
+          showMsg('saveMsg', 'info', 'ℹ️ الملف غير موجود. سيُنشأ عند الحفظ.');
+          return null;
         }
-    }
-
-    async function saveProductsToGitHub(products) {
-        const msgDiv = document.getElementById('formMsg');
-        const saveBtn = document.getElementById('saveBtn');
-        
-        // التحقق الدقيق من الخانات
-        let missingFields = [];
-        if (!GH_OWNER()) missingFields.push('اسم المستخدم (Owner)');
-        if (!GH_REPO()) missingFields.push('اسم المستودع (Repo)');
-        if (!GH_TOKEN()) missingFields.push('التوكن (Token)');
-
-        if (missingFields.length > 0) {
-            alert(`❌ لا يمكن الحفظ!\nيرجى ملء الخانات التالية في أعلى الصفحة:\n- ${missingFields.join('\n- ')}`);
-            return false;
+        if (!res.ok) {
+          return res.json().then(function (err) {
+            throw new Error(err.message || 'HTTP ' + res.status);
+          });
         }
-
-        // حفظ الإعدادات في الذاكرة احتياطياً
-        saveToken();
-
-        saveBtn.disabled = true;
-        saveBtn.innerText = '⏳ جاري الحفظ...';
-        msgDiv.innerHTML = '⏳ جاري الاتصال بـ GitHub...';
-        msgDiv.style.color = 'blue';
-
-        try {
-            const { sha, error } = await fetchProductsFromGitHub();
-            if (error && error !== 'Not Found') throw new Error(error);
-
-            const contentString = JSON.stringify(products, null, 2);
-            const bytes = new TextEncoder().encode(contentString);
-            const binString = Array.from(bytes, (byte) => String.fromCodePoint(byte)).join("");
-            const contentBase64 = btoa(binString);
-
-            const response = await fetch(`https://api.github.com/repos/${GH_OWNER()}/${GH_REPO()}/contents/${GH_FILE_PATH}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `token ${GH_TOKEN()}`,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    message: 'تحديث المنتجات من لوحة التحكم',
-                    content: contentBase64,
-                    sha: sha || undefined,
-                    branch: GH_BRANCH
-                })
-            });
-
-            const responseData = await response.json();
-
-            if (response.ok) {
-                msgDiv.innerHTML = '✅ تم الحفظ بنجاح! جاري تحويلك للمتجر...';
-                msgDiv.style.color = 'green';
-                renderTable(products);
-                setTimeout(() => { window.location.href = 'index.html'; }, 2000);
-                return true;
-            } else {
-                throw new Error(responseData.message || 'خطأ من GitHub');
-            }
-        } catch (error) {
-            alert(`❌ فشل الحفظ!\nالسبب: ${error.message}`);
-            msgDiv.innerHTML = `❌ فشل الحفظ: ${error.message}`;
-            msgDiv.style.color = 'red';
-            saveBtn.disabled = false;
-            saveBtn.innerText = 'حفظ المنتج في الموقع';
-            return false;
-        }
-    }
-
-    function renderTable(products) {
-        const tbody = document.getElementById('productsTableBody');
-        tbody.innerHTML = '';
-        if (products.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">لا توجد منتجات.</td></tr>';
-            return;
-        }
-        products.forEach(product => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><img src="${product.image}" class="product-img"></td>
-                <td>${product.name}</td>
-                <td>${product.price} ج.م</td>
-                <td>
-                    <button class="btn btn-edit" onclick="editProduct('${product.id}')">تعديل</button>
-                    <button class="btn btn-danger" onclick="deleteProduct('${product.id}')">حذف</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
+        return res.json().then(function (data) {
+          currentSha = data.sha;
+          var content = base64ToUtf8(data.content.replace(/\n/g, ''));
+          var parsed = JSON.parse(content);
+          products = Array.isArray(parsed) ? parsed : (parsed.products || []);
+          renderTable();
+          showMsg('saveMsg', 'success', '✅ تم تحميل ' + products.length + ' منتج');
         });
+      })
+      .catch(function (e) {
+        showMsg('saveMsg', 'error', '❌ فشل التحميل: ' + e.message);
+      });
+  }
+
+  // ===== Render =====
+  function renderTable() {
+    var tbody = document.getElementById('productsTableBody');
+    if (!tbody) return;
+    document.getElementById('productCount').textContent = products.length;
+
+    if (products.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:#64748b;">لا توجد منتجات</td></tr>';
+      return;
     }
 
-    document.getElementById('prodImageFile').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            if (file.size > 500 * 1024) {
-                alert('❌ الصورة كبيرة جداً (أكثر من 500 كيلوبايت). اختر صورة أصغر.');
-                this.value = '';
-                document.getElementById('imagePreview').innerHTML = '';
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                document.getElementById('imagePreview').innerHTML = `<img src="${event.target.result}" style="height:80px; border-radius:8px;">`;
-                document.getElementById('prodImageUrl').value = '';
-            };
-            reader.readAsDataURL(file);
+    tbody.innerHTML = products.map(function (p) {
+      var price = Number(p.price) || 0;
+      var image = p.image
+        ? '<img src="' + esc(p.image) + '" alt="" style="width:50px;height:50px;object-fit:cover;border-radius:6px;">'
+        : '<div style="width:50px;height:50px;background:#f1f5f9;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:24px;">⚙️</div>';
+
+      return '<tr>' +
+        '<td>' + image + '</td>' +
+        '<td>' + esc(p.name) + '</td>' +
+        '<td>' + price + ' ج.م</td>' +
+        '<td>' + esc(p.category || '') + '</td>' +
+        '<td>' +
+          '<button class="btn-secondary" onclick="editProduct(\'' + esc(p.id) + '\')">✏️ تعديل</button> ' +
+          '<button class="btn-danger" onclick="deleteProduct(\'' + esc(p.id) + '\')">🗑️ حذف</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  // ===== Edit / Delete (global) =====
+  window.editProduct = function (id) {
+    var p = products.filter(function (x) { return String(x.id) === String(id); })[0];
+    if (!p) return;
+    editingId = p.id;
+    uploadedImagePath = null;
+    document.getElementById('prodId').value = p.id;
+    document.getElementById('prodName').value = p.name || '';
+    document.getElementById('prodCategory').value = p.category || 'سيارات';
+    document.getElementById('prodPrice').value = p.price != null ? p.price : '';
+    document.getElementById('prodOldPrice').value = p.oldPrice != null ? p.oldPrice : '';
+    document.getElementById('prodBadge').value = p.badge || '';
+    document.getElementById('prodVideo').value = p.video || '';
+    document.getElementById('prodDesc').value = p.description || '';
+    document.getElementById('prodStock').checked = p.stock !== false;
+    document.getElementById('prodImageUrl').value = (p.image && p.image.indexOf('images/') !== 0) ? p.image : '';
+    document.getElementById('imagePreview').innerHTML = p.image
+      ? '<img src="' + esc(p.image) + '" style="height:80px;border-radius:8px;border:1px solid #e2e8f0;">'
+      : '';
+    document.getElementById('formTitle').textContent = 'تعديل المنتج';
+    document.getElementById('saveBtn').textContent = '💾 حفظ التعديلات';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  window.deleteProduct = function (id) {
+    if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
+    products = products.filter(function (p) { return String(p.id) !== String(id); });
+    saveProducts();
+  };
+
+  // ===== Form Submit =====
+  function handleFormSubmit(e) {
+    e.preventDefault();
+    var saveBtn = document.getElementById('saveBtn');
+    var name = document.getElementById('prodName').value.trim();
+
+    if (!name) {
+      showMsg('formMsg', 'error', '❌ اسم المنتج مطلوب');
+      return;
+    }
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = '⏳ جاري الحفظ...';
+
+    var imageUrl = document.getElementById('prodImageUrl').value.trim();
+    var fileInput = document.getElementById('prodImageFile');
+    var imagePromise;
+
+    if (fileInput.files.length > 0) {
+      var file = fileInput.files[0];
+      if (file.size > 750 * 1024) {
+        showMsg('formMsg', 'error', '❌ الصورة كبيرة جداً (الحد 750KB)');
+        saveBtn.disabled = false;
+        saveBtn.textContent = editingId ? '💾 حفظ التعديلات' : '💾 إضافة المنتج';
+        return;
+      }
+      showMsg('formMsg', 'info', '⏳ جاري رفع الصورة...');
+      imagePromise = uploadImage(file);
+    } else {
+      imagePromise = Promise.resolve(uploadedImagePath || imageUrl);
+    }
+
+    imagePromise.then(function (image) {
+      var product = {
+        id: editingId || Date.now().toString(),
+        name: name,
+        category: document.getElementById('prodCategory').value,
+        price: Number(document.getElementById('prodPrice').value) || 0,
+        oldPrice: Number(document.getElementById('prodOldPrice').value) || 0,
+        badge: document.getElementById('prodBadge').value.trim(),
+        image: image || '',
+        video: document.getElementById('prodVideo').value.trim(),
+        description: document.getElementById('prodDesc').value.trim(),
+        stock: document.getElementById('prodStock').checked
+      };
+
+      if (editingId) {
+        var idx = -1;
+        for (var i = 0; i < products.length; i++) {
+          if (String(products[i].id) === String(editingId)) { idx = i; break; }
         }
+        if (idx >= 0) products[idx] = product;
+        else products.push(product);
+      } else {
+        products.push(product);
+      }
+
+      return saveProducts().then(function () {
+        resetForm();
+        showMsg('formMsg', 'success', '✅ تم الحفظ بنجاح');
+      });
+    }).catch(function (e) {
+      showMsg('formMsg', 'error', '❌ ' + e.message);
+    }).finally(function () {
+      saveBtn.disabled = false;
+      saveBtn.textContent = editingId ? '💾 حفظ التعديلات' : '💾 إضافة المنتج';
     });
+  }
 
-    document.getElementById('productForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const id = document.getElementById('prodId').value;
-        const name = document.getElementById('prodName').value;
-        const category = document.getElementById('prodCategory').value;
-        const price = document.getElementById('prodPrice').value;
-        const oldPrice = document.getElementById('prodOldPrice').value;
-        const video = document.getElementById('prodVideo').value;
-        const description = document.getElementById('prodDesc').value;
-        
-        let image = document.getElementById('prodImageUrl').value;
-        const fileInput = document.getElementById('prodImageFile');
-        
-        if (fileInput.files.length > 0 && !image) {
-            image = await toBase64(fileInput.files[0]);
-        } else if (!image) {
-            alert('❌ يرجى رفع صورة أو وضع رابط صورة.');
-            return;
+  // ===== Upload Image =====
+  function uploadImage(file) {
+    return fileToBase64(file).then(function (base64) {
+      var ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      var filename = 'images/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+
+      return fetch(ghUrl(filename), {
+        method: 'PUT',
+        headers: ghHeaders(),
+        body: JSON.stringify({
+          message: 'Upload ' + file.name,
+          content: base64,
+          branch: config.branch
+        })
+      }).then(function (res) {
+        if (!res.ok) {
+          return res.json().then(function (err) {
+            throw new Error('فشل رفع الصورة: ' + (err.message || res.status));
+          });
         }
-
-        let products = [...currentProducts];
-
-        if (id) {
-            const index = products.findIndex(p => p.id === id);
-            if (index !== -1) products[index] = { ...products[index], name, category, price, oldPrice, image, video, description };
-        } else {
-            products.push({ id: Date.now().toString(), name, category, price, oldPrice, image, video, description });
-        }
-
-        const success = await saveProductsToGitHub(products);
-        if (success) currentProducts = products;
-    });
-
-    function toBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
+        return res.json().then(function (data) {
+          uploadedImagePath = data.content.path;
+          return uploadedImagePath;
         });
-    }
-
-    window.resetForm = function() {
-        document.getElementById('productForm').reset();
-        document.getElementById('prodId').value = '';
-        document.getElementById('formTitle').innerText = 'إضافة منتج جديد';
-        document.getElementById('imagePreview').innerHTML = '';
-        document.getElementById('formMsg').innerHTML = '';
-    };
-
-    window.editProduct = function(id) {
-        const product = currentProducts.find(p => p.id === id);
-        if (product) {
-            document.getElementById('prodId').value = product.id;
-            document.getElementById('prodName').value = product.name;
-            document.getElementById('prodCategory').value = product.category;
-            document.getElementById('prodPrice').value = product.price;
-            document.getElementById('prodOldPrice').value = product.oldPrice || '';
-            document.getElementById('prodVideo').value = product.video || '';
-            document.getElementById('prodDesc').value = product.description || '';
-            
-            if (!product.image.startsWith('data:image')) {
-                document.getElementById('prodImageUrl').value = product.image;
-                document.getElementById('imagePreview').innerHTML = `<img src="${product.image}" style="height:80px; border-radius:8px;">`;
-            } else {
-                document.getElementById('imagePreview').innerHTML = `<img src="${product.image}" style="height:80px; border-radius:8px;"><br><small style="color:red">ارفع صورة جديدة للتعديل.</small>`;
-            }
-            document.getElementById('formTitle').innerText = 'تعديل المنتج';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    };
-
-    window.deleteProduct = async function(id) {
-        if (confirm('هل أنت متأكد من الحذف؟')) {
-            let products = currentProducts.filter(p => p.id !== id);
-            await saveProductsToGitHub(products);
-        }
-    };
-
-    document.addEventListener('DOMContentLoaded', async () => {
-        loadSettings();
-        if (GH_TOKEN() && GH_OWNER() && GH_REPO()) {
-            const { products } = await fetchProductsFromGitHub();
-            currentProducts = products;
-            renderTable(products);
-        } else {
-            document.getElementById('productsTableBody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">أدخل إعدادات GitHub أولاً.</td></tr>';
-        }
+      });
     });
-}
+  }
+
+  // ===== Save Products =====
+  function saveProducts() {
+    showMsg('saveMsg', 'info', '⏳ جاري الحفظ على GitHub...');
+
+    return fetch(ghUrl('products.json', true), { headers: ghHeaders() })
+      .then(function (headRes) {
+        var sha = null;
+        if (headRes.ok) {
+          return headRes.json().then(function (data) {
+            sha = data.sha;
+            return sha;
+          });
+        }
+        return null;
+      })
+      .then(function (sha) {
+        var content = JSON.stringify(products, null, 2);
+        var body = {
+          message: 'تحديث المنتجات - ' + new Date().toISOString(),
+          content: utf8ToBase64(content),
+          branch: config.branch
+        };
+        if (sha) body.sha = sha;
+
+        return fetch(ghUrl('products.json'), {
+          method: 'PUT',
+          headers: ghHeaders(),
+          body: JSON.stringify(body)
+        });
+      })
+      .then(function (res) {
+        if (!res.ok) {
+          return res.json().then(function (err) {
+            throw new Error(err.message || 'فشل الحفظ');
+          });
+        }
+        return res.json().then(function (data) {
+          currentSha = data.content.sha;
+          renderTable();
+          showMsg('saveMsg', 'success', '✅ تم حفظ ' + products.length + ' منتج على GitHub');
+        });
+      })
+      .catch(function (e) {
+        showMsg('saveMsg', 'error', '❌ فشل الحفظ: ' + e.message);
+        throw e;
+      });
+  }
+
+  // ===== Reset =====
+  function resetForm() {
+    document.getElementById('productForm').reset();
+    document.getElementById('prodId').value = '';
+    document.getElementById('prodStock').checked = true;
+    document.getElementById('imagePreview').innerHTML = '';
+    document.getElementById('formTitle').textContent = 'إضافة منتج جديد';
+    document.getElementById('saveBtn').textContent = '💾 إضافة المنتج';
+    document.getElementById('formMsg').innerHTML = '';
+    editingId = null;
+    uploadedImagePath = null;
+  }
+
+  // ===== Image Preview =====
+  function handleImageChange(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 750 * 1024) {
+      alert('❌ الصورة كبيرة جداً (الحد 750KB)');
+      e.target.value = '';
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      document.getElementById('imagePreview').innerHTML =
+        '<img src="' + ev.target.result + '" style="height:80px;border-radius:8px;border:1px solid #e2e8f0;">';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ===== Bind =====
+  var loginForm = document.getElementById('loginForm');
+  if (loginForm) loginForm.addEventListener('submit', function (e) { e.preventDefault(); login(); });
+
+  var logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) logoutBtn.addEventListener('click', logout);
+
+  var productForm = document.getElementById('productForm');
+  if (productForm) productForm.addEventListener('submit', handleFormSubmit);
+
+  var resetBtn = document.getElementById('resetBtn');
+  if (resetBtn) resetBtn.addEventListener('click', resetForm);
+
+  var reloadBtn = document.getElementById('reloadBtn');
+  if (reloadBtn) reloadBtn.addEventListener('click', loadProducts);
+
+  var imageFile = document.getElementById('prodImageFile');
+  if (imageFile) imageFile.addEventListener('change', handleImageChange);
+
+  // ===== Auto-login =====
+  var stored = sessionStorage.getItem('gh_admin');
+  if (stored) {
+    try {
+      config = JSON.parse(stored);
+      document.getElementById('githubOwner').value = config.owner;
+      document.getElementById('githubRepo').value = config.repo;
+      document.getElementById('githubBranch').value = config.branch;
+      document.getElementById('githubToken').value = config.token;
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('adminPanel').classList.remove('hidden');
+      loadProducts();
+    } catch (e) {
+      sessionStorage.removeItem('gh_admin');
+    }
+  }
+})();
