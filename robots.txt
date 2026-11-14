@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin.html
 Disallow: /admin.js
 
-Sitemap: https://altarekagency.store/sitemap.xml
+Sitemap: https://www.altarekagency.store/sitemap.xml
