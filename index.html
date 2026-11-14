@@ -63,6 +63,10 @@
   }
   .nav-links a:hover { background: rgba(139,30,63,0.08); color: var(--primary); }
   .header-actions { display: flex; gap: 10px; align-items: center; }
+  .bearing-guide-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; }
+  .bearing-guide-grid .category-card { display:block; text-align:center; text-decoration:none; color:inherit; padding:20px 14px; min-height:118px; }
+  .bearing-guide-grid .category-card h3 { color:var(--primary); font-size:24px; margin-bottom:8px; }
+  .bearing-guide-grid .category-card p { color:var(--gray); font-size:13px; line-height:1.7; }
   .btn-cart { border: 0; border-radius: 999px; background: var(--primary); color: #fff; padding: 10px 16px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
   .cart-count { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: var(--gold); color: var(--dark); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
   .cart-overlay[hidden] { display: none; }
@@ -492,6 +496,19 @@
       </svg>
     </div>
     <h3>سيور</h3>
+  </div>
+</section>
+
+
+<section class="bearing-guide" aria-labelledby="bearingGuideTitle">
+  <h2 id="bearingGuideTitle" class="section-title">دليل كراسي الرولمان بلي</h2>
+  <p class="section-subtitle">تعرف على أشكال الكراسي الشائعة واختر النوع المناسب لطريقة التثبيت.</p>
+  <div class="categories bearing-guide-grid">
+    <a class="category-card" href="/bearings/ucp/"><h3>UCP</h3><p>كرسي قائم بقاعدة</p></a>
+    <a class="category-card" href="/bearings/ucf/"><h3>UCF</h3><p>فلانشة مربعة بأربع نقاط تثبيت</p></a>
+    <a class="category-card" href="/bearings/ucfl/"><h3>UCFL</h3><p>فلانشة بيضاوية بنقطتي تثبيت</p></a>
+    <a class="category-card" href="/bearings/ucfc/"><h3>UCFC</h3><p>فلانشة دائرية</p></a>
+    <a class="category-card" href="/bearings/snl/"><h3>SNL</h3><p>بيت رولمان بلي مشطور</p></a>
   </div>
 </section>
 
