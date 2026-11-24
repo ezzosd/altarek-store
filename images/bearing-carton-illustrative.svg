@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="700" viewBox="0 0 900 700">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f5f7fa"/><stop offset="1" stop-color="#e7edf4"/></linearGradient><linearGradient id="box" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1767a8"/><stop offset="1" stop-color="#073b70"/></linearGradient><filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="22" stdDeviation="18" flood-color="#102a43" flood-opacity=".22"/></filter></defs>
+<rect width="900" height="700" rx="28" fill="url(#bg)"/>
+<ellipse cx="450" cy="565" rx="245" ry="42" fill="#9aa9b8" opacity=".24"/>
+<g filter="url(#shadow)">
+<path d="M250 230 555 145 690 220 382 312Z" fill="#2b80bd"/>
+<path d="M250 230 382 312 382 540 250 455Z" fill="#064477"/>
+<path d="M382 312 690 220 690 450 382 540Z" fill="url(#box)"/>
+<path d="M555 145 690 220 382 312 250 230Z" fill="#4b9bd0"/>
+<path d="M382 312 690 220 690 252 382 345Z" fill="#0b5590" opacity=".65"/>
+<path d="M250 230 382 312 382 345 250 263Z" fill="#0a3a65" opacity=".65"/>
+<text x="520" y="375" font-family="Arial,sans-serif" font-size="76" font-weight="800" text-anchor="middle" fill="#fff" letter-spacing="2">SKF</text>
+<path d="M435 400h170" stroke="#fff" stroke-width="5" opacity=".8"/>
+<text x="520" y="445" font-family="Arial,sans-serif" font-size="25" font-weight="700" text-anchor="middle" fill="#fff">BALL BEARING</text>
+<text x="520" y="480" font-family="Arial,sans-serif" font-size="17" text-anchor="middle" fill="#d8eafa">INDUSTRIAL COMPONENTS</text>
+<rect x="275" y="350" width="78" height="62" rx="5" fill="#f5f8fb" opacity=".95"/>
+<path d="M289 367h49M289 380h49M289 393h33" stroke="#1c5d91" stroke-width="5" stroke-linecap="round"/>
+</g>
+<rect x="245" y="600" width="410" height="38" rx="19" fill="#fff" opacity=".85"/>
+<text x="450" y="625" font-family="Arial,sans-serif" font-size="20" text-anchor="middle" fill="#566575">Illustrative packaging image</text>
+</svg>
