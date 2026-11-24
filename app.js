@@ -6,6 +6,11 @@
   var ICON_PLAY = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
   var ICON_EMPTY = '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 16px;opacity:0.4;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35M8 11h6"/></svg>';
 
+  var CATEGORY_IMAGE = {
+    'رولمان بلي': 'https://img.alicdn.com/i2/1741716481/TB2ogSpd3nH8KJjSspcXXb3QFXa_%21%211741716481.jpg',
+    'أويل سيل': 'https://www.harfington.com/cdn/shop/files/ux_a21052200ux0105_ux_g03.jpg?v=1713974521',
+    'سيور': 'https://cdn11.bigcommerce.com/s-h1jjeo/images/stencil/1280x1280/products/434338/886137/T109023%20%283%29__26395.1509463794.jpg?c=2'
+  };
   function getCategorySVG(category) {
     var p='#8B1E3F', g='#C9A961';
     if (category === 'رولمان بلي') return '<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;padding:15%"><circle cx="100" cy="100" r="78" fill="#F5F1EB" stroke="'+p+'" stroke-width="3"/><circle cx="100" cy="100" r="66" fill="none" stroke="'+g+'" stroke-width="2"/><circle cx="100" cy="100" r="30" fill="none" stroke="'+p+'" stroke-width="3"/><circle cx="100" cy="52" r="6" fill="'+g+'"/><circle cx="100" cy="148" r="6" fill="'+g+'"/><circle cx="52" cy="100" r="6" fill="'+g+'"/><circle cx="148" cy="100" r="6" fill="'+g+'"/></svg>';
@@ -128,7 +133,10 @@
   }
   function renderCard(p) {
     var inStock=p.stock!==false;
-    var imageHtml=p.image?'<img src="'+esc(p.image)+'" alt="'+esc(p.name)+'" loading="lazy" onerror="this.onerror=null;this.src=\'logo.png\';" />':'<div class="img-placeholder">'+getCategorySVG(p.category)+'</div>';
+    var imageUrl=p.image || CATEGORY_IMAGE[p.category] || '';
+    var imageHtml=imageUrl
+      ? '<img src="'+esc(imageUrl)+'" alt="'+esc(p.name)+' - صورة توضيحية لفئة '+esc(p.category||'قطع غيار')+'" loading="lazy" onerror="this.onerror=null;this.src=\\'logo.png\\';" />'
+      : '<div class="img-placeholder">'+getCategorySVG(p.category)+'</div>';
     var badgeHtml=p.badge?'<span class="badge">'+esc(p.badge)+'</span>':'';
     var stockHtml=!inStock?'<span class="out-of-stock">غير متوفر</span>':'';
     var videoBtn=p.video && /^https?:\/\//.test(p.video)?'<a href="'+esc(p.video)+'" target="_blank" rel="noopener" class="btn-video" title="فيديو">'+ICON_PLAY+'</a>':'';
