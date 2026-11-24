@@ -135,7 +135,7 @@
     var inStock=p.stock!==false;
     var imageUrl=p.image || CATEGORY_IMAGE[p.category] || '';
     var imageHtml=imageUrl
-      ? '<img src="'+esc(imageUrl)+'" alt="'+esc(p.name)+' - صورة توضيحية لفئة '+esc(p.category||'قطع غيار')+'" loading="lazy" onerror="this.onerror=null;this.src=\\'logo.png\\';" />'
+      ? '<img src="'+esc(imageUrl)+'" alt="'+esc(p.name)+' - صورة توضيحية لفئة '+esc(p.category||'قطع غيار')+'" loading="lazy" onerror="this.onerror=null;this.src=\'logo.png\';" />'
       : '<div class="img-placeholder">'+getCategorySVG(p.category)+'</div>';
     var badgeHtml=p.badge?'<span class="badge">'+esc(p.badge)+'</span>':'';
     var stockHtml=!inStock?'<span class="out-of-stock">غير متوفر</span>':'';
