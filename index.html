@@ -206,6 +206,18 @@
     box-shadow: 0 0 0 4px rgba(139,30,63,0.10);
   }
 
+  .product-filter-bar {
+    max-width: 1152px; margin: -14px auto 28px; padding: 0 24px;
+    display: flex; align-items: end; gap: 12px; flex-wrap: wrap;
+  }
+  .product-filter-bar label { display: grid; gap: 6px; color: var(--gray); font-size: 13px; font-weight: 700; }
+  .product-filter-bar select, .product-filter-bar button {
+    min-height: 42px; border: 1px solid var(--border); border-radius: 12px;
+    background: #fff; color: var(--dark); padding: 8px 12px; font: inherit;
+  }
+  .product-filter-bar button { cursor: pointer; color: var(--primary); font-weight: 800; }
+  .product-filter-bar button:hover { border-color: var(--primary); background: #FEF2F5; }
+  .results-count { margin-right: auto; color: var(--gray); font-size: 13px; padding: 10px 0; }
   .products-grid {
     max-width: 1200px; margin: 0 auto; padding: 0 24px 60px;
     display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px;
@@ -409,6 +421,10 @@
     .hero { padding: 70px 20px 80px; }
     .section-title { margin-top: 60px; }
     .products-grid, .categories, .contact-section { padding-left: 16px; padding-right: 16px; }
+    .product-filter-bar { padding-left: 16px; padding-right: 16px; }
+    .product-filter-bar label { flex: 1 1 100%; }
+    .product-filter-bar select { width: 100%; }
+    .results-count { margin-right: 0; width: 100%; }
     .whatsapp-float { bottom: 20px; left: 20px; width: 54px; height: 54px; }
     .whatsapp-float svg { width: 28px; height: 28px; }
   }
@@ -515,7 +531,21 @@
 <h2 id="products" class="section-title">أحدث المنتجات</h2>
 <p class="section-subtitle">تصفح أحدث ما وصلنا من منتجات أصلية</p>
 <div class="search-bar">
-  <input type="search" id="searchInput" placeholder="ابحث بالاسم أو الكود أو النوع أو الوصف..." aria-label="بحث">
+  <input type="search" id="searchInput" placeholder="ابحث بالاسم أو الكود أو المقاس أو الشركة..." aria-label="بحث">
+</div>
+<div class="product-filter-bar" aria-label="تصفية المنتجات">
+  <label>الشركة / العلامة
+    <select id="brandFilter"><option value="all">كل الشركات والعلامات</option></select>
+  </label>
+  <label>ترتيب المنتجات
+    <select id="sortFilter">
+      <option value="default">الترتيب الافتراضي</option>
+      <option value="name">الاسم: أ إلى ي</option>
+      <option value="name-desc">الاسم: ي إلى أ</option>
+    </select>
+  </label>
+  <button type="button" id="clearFilters">مسح التصفية</button>
+  <span id="resultsCount" class="results-count" aria-live="polite"></span>
 </div>
 <section class="products-grid" id="storeProducts">
   <div class="loading-state">⏳ جاري تحميل المنتجات...</div>
