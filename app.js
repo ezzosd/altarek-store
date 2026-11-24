@@ -23,7 +23,15 @@
       .replace(/[ًٌٍَُِّْـ]/g,'')
       .replace(/[٠-٩]/g,function(d){return String('٠١٢٣٤٥٦٧٨٩'.indexOf(d));})
       .replace(/[۰-۹]/g,function(d){return String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d));})
+      .replace(/[أإآ]/g,'ا')
+      .replace(/ى/g,'ي')
+      .replace(/[×*]/g,'x')
+      .replace(/[‐‑‒–—−]/g,'-')
+      .replace(/\s+/g,' ')
       .trim();
+  }
+  function compactSearch(s) {
+    return normalize(s).replace(/[\s._/\\-]+/g,'');
   }
 
   var allProducts=[], currentCategory='all', currentSearch='';
@@ -77,8 +85,14 @@
     return allProducts.filter(function(p) {
       if(currentCategory!=='all' && (p.category||'')!==currentCategory) return false;
       if(currentSearch) {
-        var haystack=[p.name,p.id,p.category,p.description,p.badge,p.code,p.type].map(normalize).join(' ');
-        if(haystack.indexOf(currentSearch)===-1) return false;
+        var fields=[p.name,p.id,p.category,p.description,p.badge,p.code,p.size,p.brand,p.type];
+        var haystack=fields.map(normalize).join(' ');
+        var compactHaystack=compactSearch(fields.join(' '));
+        var terms=currentSearch.split(/\s+/).filter(Boolean);
+        var matches=terms.every(function(term){
+          return haystack.indexOf(term)!==-1 || compactHaystack.indexOf(compactSearch(term))!==-1;
+        });
+        if(!matches) return false;
       }
       return true;
     });
@@ -99,17 +113,30 @@
     var badgeHtml=p.badge?'<span class="badge">'+esc(p.badge)+'</span>':'';
     var stockHtml=!inStock?'<span class="out-of-stock">غير متوفر</span>':'';
     var videoBtn=p.video && /^https?:\/\//.test(p.video)?'<a href="'+esc(p.video)+'" target="_blank" rel="noopener" class="btn-video" title="فيديو">'+ICON_PLAY+'</a>':'';
-    var waBtn=inStock?'<button class="btn-order btn-whatsapp" data-name="'+esc(p.name)+'" type="button">'+ICON_WHATSAPP+'<span>اطلب السعر عبر واتساب</span></button>':'<button class="btn-order" disabled type="button">غير متوفر</button>';
+    var specs=[];
+    if(p.code) specs.push('الكود: '+esc(p.code));
+    if(p.size) specs.push('المقاس: '+esc(p.size));
+    if(p.brand) specs.push('الشركة: '+esc(p.brand));
+    var specsHtml=specs.length?'<div class="product-specs" style="font-size:12px;color:#64748b;line-height:1.8;margin:7px 0;">'+specs.join(' <span aria-hidden="true">•</span> ')+'</div>':'';
+    var waBtn=inStock?'<button class="btn-order btn-whatsapp" data-product-id="'+esc(p.id)+'" type="button">'+ICON_WHATSAPP+'<span>اطلب السعر عبر واتساب</span></button>':'<button class="btn-order" disabled type="button">غير متوفر</button>';
     var addBtn=inStock?'<button class="btn-add-cart" data-add-cart="'+esc(p.id)+'" type="button">أضف إلى السلة</button>':'';
     var fbBtn=inStock?'<a href="https://m.me/61562790860633" target="_blank" rel="noopener" class="btn-order btn-facebook">'+ICON_FACEBOOK+'<span>فيسبوك</span></a>':'';
-    return '<div class="product-card"><div class="product-image">'+imageHtml+badgeHtml+stockHtml+'</div><div class="product-info"><div class="product-category">'+esc(p.category||'')+'</div><h3 class="product-title">'+esc(p.name||'')+'</h3><div class="product-actions">'+waBtn+addBtn+fbBtn+videoBtn+'</div></div></div>';
+    return '<div class="product-card"><div class="product-image">'+imageHtml+badgeHtml+stockHtml+'</div><div class="product-info"><div class="product-category">'+esc(p.category||'')+'</div><h3 class="product-title">'+esc(p.name||'')+'</h3>'+specsHtml+'<div class="product-actions">'+waBtn+addBtn+fbBtn+videoBtn+'</div></div></div>';
   }
-  function orderProduct(name) {
-    var msg=encodeURIComponent('مرحباً، أريد الاستفسار عن سعر وتوفر المنتج: '+name);
+  function productDetails(p) {
+    return [p.code?'الكود: '+p.code:'',p.size?'المقاس: '+p.size:'',p.brand?'الشركة المصنعة: '+p.brand:''].filter(Boolean).join(' | ');
+  }
+  function orderProduct(product) {
+    var details=productDetails(product);
+    var msg=encodeURIComponent('مرحباً، أريد الاستفسار عن سعر وتوفر المنتج: '+product.name+(details?'\n'+details:''));
     window.open('https://wa.me/201110666981?text='+msg,'_blank','noopener');
   }
   function sendCart() {
-    var lines=cart.map(function(item,i){return (i+1)+'. '+(findProduct(item.id)?.name||item.name)+' — الكمية: '+item.qty;});
+    var lines=cart.map(function(item,i){
+      var p=findProduct(item.id);
+      var details=p?productDetails(p):'';
+      return (i+1)+'. '+(p?p.name:item.name)+(details?' ('+details+')':'')+' — الكمية: '+item.qty;
+    });
     var message='مرحباً وكالة الطارق، أريد الاستفسار عن سعر وتوفر المنتجات التالية:\n'+lines.join('\n')+'\nشكراً لكم.';
     window.open('https://wa.me/201110666981?text='+encodeURIComponent(message),'_blank','noopener');
   }
@@ -117,8 +144,11 @@
   if(grid) grid.addEventListener('click',function(e) {
     var add=e.target.closest('[data-add-cart]');
     if(add) {addToCart(add.getAttribute('data-add-cart')); add.textContent='تمت الإضافة ✓'; setTimeout(function(){if(add.isConnected)add.textContent='أضف إلى السلة';},1100); return;}
-    var order=e.target.closest('.btn-order[data-name]');
-    if(order) orderProduct(order.getAttribute('data-name'));
+    var order=e.target.closest('.btn-order[data-product-id]');
+    if(order) {
+      var product=findProduct(order.getAttribute('data-product-id'));
+      if(product) orderProduct(product);
+    }
   });
   if(searchInput) {
     var searchTimer;
