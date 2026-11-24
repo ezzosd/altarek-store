@@ -103,7 +103,7 @@
       var name = (obj.name || obj['الاسم'] || obj['اسم المنتج'] || '').trim();
       if (!name) continue;
       var stock = obj.stock || obj['متوفر'] || 'true';
-      result.push({
+      var product = {
         id: (obj.id || Date.now().toString() + '_' + r).toString(),
         name: name,
         category: (obj.category || obj['القسم'] || obj['النوع'] || 'رولمان بلي').trim(),
@@ -114,7 +114,14 @@
         video: (obj.video || obj['الفيديو'] || '').trim(),
         description: (obj.description || obj['الوصف'] || '').trim(),
         stock: String(stock).toLowerCase() !== 'false' && String(stock) !== 'لا'
-      });
+      };
+      var code = (obj.code || obj['الكود'] || obj['كود المنتج'] || '').trim();
+      var size = (obj.size || obj['المقاس'] || '').trim();
+      var brand = (obj.brand || obj['الشركة المصنعة'] || obj['الشركة'] || obj['الماركة'] || '').trim();
+      if (code) product.code = code;
+      if (size) product.size = size;
+      if (brand) product.brand = brand;
+      result.push(product);
     }
     return result;
   }
@@ -208,7 +215,7 @@
 
   window.exportCSV = function () {
     if (products.length === 0) { alert('❌ لا توجد منتجات لتصديرها'); return; }
-    var headers = ['id', 'name', 'category', 'badge', 'image', 'video', 'description', 'stock'];
+    var headers = ['id', 'name', 'category', 'code', 'size', 'brand', 'badge', 'image', 'video', 'description', 'stock'];
     var rows = [headers.join(',')];
     products.forEach(function (p) {
       var row = headers.map(function (h) {
@@ -256,8 +263,12 @@
             for (var i = 0; i < products.length; i++) {
               if (String(products[i].id) === String(item.id)) { idx = i; break; }
             }
-            if (idx >= 0) products[idx] = item;
-            else products.push(item);
+            if (idx >= 0) {
+              ['code', 'size', 'brand'].forEach(function (field) {
+                if (item[field] === undefined && products[idx][field] !== undefined) item[field] = products[idx][field];
+              });
+              products[idx] = item;
+            } else products.push(item);
           });
         }
 
@@ -295,6 +306,9 @@
     document.getElementById('prodPrice').value = p.price != null ? p.price : '';
     document.getElementById('prodOldPrice').value = p.oldPrice != null ? p.oldPrice : '';
     document.getElementById('prodBadge').value = p.badge || '';
+    document.getElementById('prodCode').value = p.code || '';
+    document.getElementById('prodSize').value = p.size || '';
+    document.getElementById('prodBrand').value = p.brand || '';
     document.getElementById('prodVideo').value = p.video || '';
     document.getElementById('prodDesc').value = p.description || '';
     document.getElementById('prodStock').checked = p.stock !== false;
@@ -345,6 +359,9 @@
         price: Number(document.getElementById('prodPrice').value) || 0,
         oldPrice: Number(document.getElementById('prodOldPrice').value) || 0,
         badge: document.getElementById('prodBadge').value.trim(),
+        code: document.getElementById('prodCode').value.trim(),
+        size: document.getElementById('prodSize').value.trim(),
+        brand: document.getElementById('prodBrand').value.trim(),
         image: image || '',
         video: document.getElementById('prodVideo').value.trim(),
         description: document.getElementById('prodDesc').value.trim(),
