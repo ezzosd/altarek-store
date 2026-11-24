@@ -7,9 +7,9 @@
   var ICON_EMPTY = '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 16px;opacity:0.4;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35M8 11h6"/></svg>';
 
   var CATEGORY_IMAGE = {
-    'رولمان بلي': 'https://img.alicdn.com/i2/1741716481/TB2ogSpd3nH8KJjSspcXXb3QFXa_%21%211741716481.jpg',
-    'أويل سيل': 'https://www.harfington.com/cdn/shop/files/ux_a21052200ux0105_ux_g03.jpg?v=1713974521',
-    'سيور': 'https://cdn11.bigcommerce.com/s-h1jjeo/images/stencil/1280x1280/products/434338/886137/T109023%20%283%29__26395.1509463794.jpg?c=2'
+    'رولمان بلي': 'images/category-bearing.svg',
+    'أويل سيل': 'images/category-oil-seal.svg',
+    'سيور': 'images/category-belts.svg'
   };
   function getCategorySVG(category) {
     var p='#8B1E3F', g='#C9A961';
