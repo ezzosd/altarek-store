@@ -6,6 +6,7 @@
   var currentSha = null;
   var editingId = null;
   var uploadedImagePath = null;
+  var currentImagePath = '';
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -299,7 +300,7 @@
   window.editProduct = function (id) {
     var p = products.filter(function (x) { return String(x.id) === String(id); })[0];
     if (!p) return;
-    editingId = p.id; uploadedImagePath = null;
+    editingId = p.id; uploadedImagePath = null; currentImagePath = p.image || '';
     document.getElementById('prodId').value = p.id;
     document.getElementById('prodName').value = p.name || '';
     document.getElementById('prodCategory').value = p.category || 'رولمان بلي';
@@ -348,7 +349,7 @@
       showMsg('formMsg', 'info', '⏳ جاري رفع الصورة...');
       imagePromise = uploadImage(file);
     } else {
-      imagePromise = Promise.resolve(uploadedImagePath || imageUrl);
+      imagePromise = Promise.resolve(uploadedImagePath || imageUrl || currentImagePath);
     }
 
     imagePromise.then(function (image) {
@@ -436,7 +437,7 @@
     document.getElementById('formTitle').textContent = 'إضافة منتج جديد';
     document.getElementById('saveBtn').textContent = '💾 إضافة المنتج';
     document.getElementById('formMsg').innerHTML = '';
-    editingId = null; uploadedImagePath = null;
+    editingId = null; uploadedImagePath = null; currentImagePath = '';
   }
 
   function handleImageChange(e) {
