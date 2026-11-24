@@ -34,7 +34,11 @@
     return normalize(s).replace(/[\s._/\\-]+/g,'');
   }
 
-  var allProducts=[], currentCategory='all', currentSearch='';
+  var allProducts=[], currentCategory='all', currentSearch='', currentBrand='all', currentSort='default';
+  var brandFilter=document.getElementById('brandFilter');
+  var sortFilter=document.getElementById('sortFilter');
+  var resultsCount=document.getElementById('resultsCount');
+  var clearFilters=document.getElementById('clearFilters');
   var cart=[];
   var CART_KEY='altarek_cart_v1';
   var grid=document.getElementById('storeProducts');
@@ -81,14 +85,25 @@
   }
   function openCart() { if(cartOverlay) {cartOverlay.hidden=false; updateCartUI();} }
   function closeCart() { if(cartOverlay) cartOverlay.hidden=true; }
+  function productBrand(p) { return String(p.brand || p.badge || '').trim(); }
+  function populateBrandFilter() {
+    if(!brandFilter) return;
+    var brands=[];
+    allProducts.forEach(function(p){var b=productBrand(p);if(b && !brands.some(function(x){return normalize(x)===normalize(b);}))brands.push(b);});
+    brands.sort(function(a,b){return a.localeCompare(b,'ar');});
+    brandFilter.innerHTML='<option value="all">كل الشركات والعلامات</option>'+brands.map(function(b){return '<option value="'+esc(b)+'">'+esc(b)+'</option>';}).join('');
+    brandFilter.value=currentBrand;
+    if(brandFilter.value!==currentBrand){currentBrand='all';brandFilter.value='all';}
+  }
   function filterProducts() {
-    return allProducts.filter(function(p) {
+    var filtered=allProducts.filter(function(p) {
       if(currentCategory!=='all' && (p.category||'')!==currentCategory) return false;
+      if(currentBrand!=='all' && normalize(productBrand(p))!==normalize(currentBrand)) return false;
       if(currentSearch) {
         var fields=[p.name,p.id,p.category,p.description,p.badge,p.code,p.size,p.brand,p.type];
         var haystack=fields.map(normalize).join(' ');
         var compactHaystack=compactSearch(fields.join(' '));
-        var terms=currentSearch.split(/\s+/).filter(Boolean);
+        var terms=currentSearch.split(/\\s+/).filter(Boolean);
         var matches=terms.every(function(term){
           return haystack.indexOf(term)!==-1 || compactHaystack.indexOf(compactSearch(term))!==-1;
         });
@@ -96,10 +111,14 @@
       }
       return true;
     });
+    if(currentSort==='name') filtered.sort(function(a,b){return String(a.name||'').localeCompare(String(b.name||''),'ar');});
+    else if(currentSort==='name-desc') filtered.sort(function(a,b){return String(b.name||'').localeCompare(String(a.name||''),'ar');});
+    return filtered;
   }
   function render() {
     if(!grid) return;
     var filtered=filterProducts();
+    if(resultsCount) resultsCount.textContent='عرض '+filtered.length+' من '+allProducts.length+' منتج';
     if(!filtered.length) {
       var empty=allProducts.length===0;
       grid.innerHTML='<div class="empty-state">'+ICON_EMPTY+'<h3>'+(empty?'لا توجد منتجات حالياً':'لا توجد نتائج مطابقة')+'</h3><p>'+(empty?'يرجى العودة لاحقاً أو التواصل معنا للاستفسار':'جرّب تغيير كلمة البحث أو القسم')+'</p></div>';
@@ -154,6 +173,16 @@
     var searchTimer;
     searchInput.addEventListener('input',function(e){clearTimeout(searchTimer);searchTimer=setTimeout(function(){currentSearch=normalize(e.target.value);render();},160);});
   }
+  if(brandFilter) brandFilter.addEventListener('change',function(){currentBrand=brandFilter.value;render();});
+  if(sortFilter) sortFilter.addEventListener('change',function(){currentSort=sortFilter.value;render();});
+  if(clearFilters) clearFilters.addEventListener('click',function(){
+    currentCategory='all';currentSearch='';currentBrand='all';currentSort='default';
+    if(searchInput) searchInput.value='';
+    if(brandFilter) brandFilter.value='all';
+    if(sortFilter) sortFilter.value='default';
+    categoryCards.forEach(function(c){c.classList.remove('active');});
+    render();
+  });
   categoryCards.forEach(function(card) {
     card.addEventListener('click',function() {
       var cat=card.getAttribute('data-category');
@@ -187,7 +216,7 @@
   function loadProducts() {
     fetch('products.json?v='+Date.now(),{cache:'no-store'})
       .then(function(res){if(!res.ok)throw new Error('HTTP '+res.status);return res.json();})
-      .then(function(data){if(Array.isArray(data))allProducts=data;else if(data&&Array.isArray(data.products))allProducts=data.products;else allProducts=[];cart=cart.filter(function(item){var p=findProduct(item.id);return p&&p.stock!==false;});saveCart();updateCartUI();render();})
+      .then(function(data){if(Array.isArray(data))allProducts=data;else if(data&&Array.isArray(data.products))allProducts=data.products;else allProducts=[];populateBrandFilter();cart=cart.filter(function(item){var p=findProduct(item.id);return p&&p.stock!==false;});saveCart();updateCartUI();render();})
       .catch(function(err){console.warn('فشل تحميل المنتجات:',err);allProducts=[];render();});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadProducts);else loadProducts();
