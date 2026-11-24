@@ -103,7 +103,7 @@
         var fields=[p.name,p.id,p.category,p.description,p.badge,p.code,p.size,p.brand,p.type];
         var haystack=fields.map(normalize).join(' ');
         var compactHaystack=compactSearch(fields.join(' '));
-        var terms=currentSearch.split(/\\s+/).filter(Boolean);
+        var terms=currentSearch.split(/\s+/).filter(Boolean);
         var matches=terms.every(function(term){
           return haystack.indexOf(term)!==-1 || compactHaystack.indexOf(compactSearch(term))!==-1;
         });
