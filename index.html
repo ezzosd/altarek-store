@@ -414,7 +414,17 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+
+  .faq-section { max-width: 900px; margin: 0 auto; padding: 0 24px 70px; }
+  .faq-list { display: grid; gap: 12px; }
+  .faq-item { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; box-shadow: var(--shadow-md); }
+  .faq-item summary { cursor: pointer; color: var(--primary); font-weight: 800; font-size: 16px; }
+  .faq-item p { color: var(--gray); margin: 12px 0 0; line-height: 1.9; }
+  .faq-item[open] { border-color: rgba(139,30,63,.35); }
+
   @media (max-width: 768px) {
+    .faq-section { padding-left: 16px; padding-right: 16px; }
+    .faq-item { padding: 16px; }
     .nav-links { display: none; }
     .header-container { padding: 12px 16px; }
     .brand img { height: 42px; }
@@ -429,6 +439,38 @@
     .whatsapp-float svg { width: 28px; height: 28px; }
   }
 </style>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Store",
+  "name": "وكالة الطارق لتجارة رولمان البلي",
+  "url": "https://www.altarekagency.store/",
+  "description": "وكالة الطارق لتجارة رولمان البلي والأويل سيل والسيور وقطع الغيار الصناعية. استفسر عن السعر والتوفر عبر واتساب.",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "15 شارع شامبليون",
+    "addressLocality": "القاهرة",
+    "addressCountry": "EG"
+  },
+  "telephone": ["+20225764191", "+201110666981", "+201068640790"],
+  "sameAs": ["https://www.facebook.com/profile.php?id=61562790860633"]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"هل أسعار المنتجات معروضة على الموقع؟","acceptedAnswer":{"@type":"Answer","text":"لا، الأسعار لا تُعرض على الموقع. يمكنك طلب السعر والتوفر عبر واتساب أو إرسال سلة المنتجات في رسالة واحدة."}},
+    {"@type":"Question","name":"كيف أطلب أكثر من منتج في رسالة واحدة؟","acceptedAnswer":{"@type":"Answer","text":"أضف المنتجات إلى السلة، واضبط الكميات، ثم أرسل الطلب عبر واتساب."}},
+    {"@type":"Question","name":"ما المعلومات التي تساعد في تحديد رولمان البلي المناسب؟","acceptedAnswer":{"@type":"Answer","text":"رقم الكود أو المقاس أو صورة واضحة للقطعة القديمة تساعد في تحديد المنتج المناسب."}},
+    {"@type":"Question","name":"هل يمكن الاستفسار عن التوفر قبل الشراء؟","acceptedAnswer":{"@type":"Answer","text":"يمكن الاستفسار عن السعر والتوفر عبر واتساب قبل إتمام الطلب."}}
+  ]
+}
+</script>
+
 </head>
 <body>
 
@@ -549,6 +591,18 @@
 </div>
 <section class="products-grid" id="storeProducts">
   <div class="loading-state">⏳ جاري تحميل المنتجات...</div>
+</section>
+
+
+<section class="faq-section" id="faq" aria-labelledby="faqTitle">
+  <h2 id="faqTitle" class="section-title">أسئلة شائعة عن منتجات وكالة الطارق</h2>
+  <p class="section-subtitle">إجابات سريعة تساعدك قبل طلب قطع الغيار</p>
+  <div class="faq-list">
+    <details class="faq-item"><summary>هل أسعار المنتجات معروضة على الموقع؟</summary><p>لا، الأسعار لا تُعرض على الموقع. اضغط «اطلب السعر عبر واتساب» أو أضف المنتجات إلى السلة لإرسال استفسار واحد عن السعر والتوفر.</p></details>
+    <details class="faq-item"><summary>كيف أطلب أكثر من منتج في رسالة واحدة؟</summary><p>اضغط «أضف إلى السلة» بجوار كل منتج، ثم افتح سلة الطلبات واضبط الكميات، وبعدها اختر «إرسال الطلب عبر واتساب».</p></details>
+    <details class="faq-item"><summary>ما المعلومات التي تساعد في تحديد رولمان البلي المناسب؟</summary><p>أرسل رقم الكود المكتوب على القطعة، أو المقاس، أو صورة واضحة للقطعة القديمة. ويمكنك أيضًا ذكر نوع الاستخدام أو الماكينة.</p></details>
+    <details class="faq-item"><summary>هل يمكن الاستفسار عن التوفر قبل الشراء؟</summary><p>نعم، أرسل اسم المنتج أو الكود عبر واتساب للاستفسار عن السعر والتوفر قبل إتمام الطلب.</p></details>
+  </div>
 </section>
 
 <h2 id="contact" class="section-title">تواصل معنا</h2>
